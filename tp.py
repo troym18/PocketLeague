@@ -63,24 +63,21 @@ def onKeyHold(app, keys):
         myPlayer.moveRight()
     elif 'a' in keys:
         myPlayer.moveLeft()
-    else:
-        myPlayer.stopHorizontalMovement()
-    
     if 'w' in keys and myPlayer.inAir:
         myPlayer.rotate(5)
     if 's' in keys and myPlayer.inAir:
         myPlayer.rotate(-5)
-    if 'space' in keys:
-        myPlayer.jump()
 
-def onKeyRelease(app, key):
+def onKeyPress(app, key):
     myPlayer = app.players[0]
-    if key in ['a', 'd']:
-        myPlayer.stopHorizontalMovement()
+    if key == 'space' and not(myPlayer.inAir):
+        myPlayer.jump()
 
 def onStep(app):
     for player in app.players:
         player.checkAirborne()
         player.updateMovement()
+        if not player.inAir:
+            player.decelerate()
     
 runApp()

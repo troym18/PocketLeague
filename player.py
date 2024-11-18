@@ -14,7 +14,7 @@ class Player:
         self.dir = direction
         self.team = team
         self.inAir = False
-        self.speed = 5  # Constant speed for left/right movement
+        self.speed = 250
 
     def moveLeft(self):
         if not self.inAir:
@@ -24,38 +24,40 @@ class Player:
         if not self.inAir:
             self.vx = self.speed
 
-    def stopHorizontalMovement(self):
-        self.vx = 0
+    def decelerate(self):
+        if self.vx>50:
+            self.vx -= 50
+        elif self.vx<-50:
+            self.vx += 50
+        elif -50 <= self.vx <= 50:
+            self.vx = 0
 
     def jump(self):
-        if not self.inAir:
-            self.vy = -15  # Adjust this value for desired jump height
+        self.vy = -200
 
     def rotate(self, angle):
         self.dir += angle
 
     def checkAirborne(self):
-        ground_threshold = 20
-        if self.cy >= self.app.mapBottom - ground_threshold:
+        playerHeight=20
+        if self.cy >= self.app.mapBottom - playerHeight and self.vy>0:
             self.inAir = False
-            self.cy = self.app.mapBottom - ground_threshold
+            self.cy = self.app.mapBottom - playerHeight
             self.vy = 0
         else:
             self.inAir = True
 
     def updateMovement(self):
-        gravity = 0.5  # Reduced gravity for smoother fall
+        gravity = 200
 
         if self.inAir:
-            self.vy += gravity
+            self.vy += gravity * DT
         else:
             self.vy = 0
 
-        # Update position
-        self.cx += self.vx
-        self.cy += self.vy
+        self.cx += self.vx * DT
+        self.cy += self.vy * DT
         
-        # Constrain player position within map bounds
         self.cx = max(self.app.mapLeft, min(self.cx, self.app.mapRight))
         self.cy = max(self.app.mapTop, min(self.cy, self.app.mapBottom))
 
