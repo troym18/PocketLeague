@@ -75,8 +75,9 @@ def drawPlayers(app):
     playerWidth=50
     playerHeight=20
     for player in app.players:
+        fill = gradient(player.team,'black',start='top')
         drawRect(player.cx-playerWidth/2,player.cy-playerHeight/2,playerWidth,
-                 playerHeight,fill=player.team,rotateAngle=player.dir)
+                 playerHeight,fill=fill,rotateAngle=player.dir)
         
 def onKeyHold(app, keys):
     myPlayer = app.players[0]

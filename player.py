@@ -16,6 +16,8 @@ class Player:
         self.inAir = False
         self.speed = 250
         self.playerHeight = 20
+        #Vector normal to surface player is on
+        self.normal=(1,0)
 
     def moveLeft(self):
         if not self.inAir:
