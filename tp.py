@@ -1,9 +1,5 @@
 from cmu_graphics import *
-import numpy as np
 from player import Player
-
-def vec(x, y):
-    return np.array([x, y], dtype=np.int32)
 
 def onAppStart(app):
     app.width = 1200
@@ -14,7 +10,7 @@ def onAppStart(app):
     app.cornerRadius=100
     app.mapRight=1175
     app.mapBottom=725
-    app.players=[Player(vec(100,app.mapBottom-50),0,'blue')]
+    app.players=[Player(100,app.mapBottom-50,0,'blue',app)]
 
 def redrawAll(app):
     drawMap(app)
@@ -59,16 +55,12 @@ def drawMap(app):
 
 def drawPlayers(app):
     for player in app.players:
-        cx=player.pos[0]
-        print(cx, type(cx))
-        cy=int(player.pos[1])
-        drawRect(cx,cy,50,20,fill=player.team,rotateAngle=player.dir)
+        drawRect(player.cx,player.cy,50,20,fill=player.team,rotateAngle=player.dir)
 
 def onStep(app):
     for player in app.players:
         player.checkAirborne(app)
-        player.checkCollision()
-        player.updateMovement()
+        player.updateMovement(app)
         
 def onKeyHold(app,key):
     myPlayer=app.players[0]
@@ -81,6 +73,6 @@ def onKeyHold(app,key):
     if key == 's' and myPlayer.inAir:
         myPlayer.rotate(-10)
     if key=='space' and not myPlayer.inAir:
-        myPlayer.vel[1]+=100
+        myPlayer.vy+=100
     
 runApp()
