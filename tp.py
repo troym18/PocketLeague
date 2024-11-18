@@ -56,23 +56,31 @@ def drawMap(app):
 def drawPlayers(app):
     for player in app.players:
         drawRect(player.cx,player.cy,50,20,fill=player.team,rotateAngle=player.dir)
+        
+def onKeyHold(app, keys):
+    myPlayer = app.players[0]
+    if 'd' in keys:
+        myPlayer.moveRight()
+    elif 'a' in keys:
+        myPlayer.moveLeft()
+    else:
+        myPlayer.stopHorizontalMovement()
+    
+    if 'w' in keys and myPlayer.inAir:
+        myPlayer.rotate(5)
+    if 's' in keys and myPlayer.inAir:
+        myPlayer.rotate(-5)
+    if 'space' in keys:
+        myPlayer.jump()
+
+def onKeyRelease(app, key):
+    myPlayer = app.players[0]
+    if key in ['a', 'd']:
+        myPlayer.stopHorizontalMovement()
 
 def onStep(app):
     for player in app.players:
-        player.checkAirborne(app)
-        player.updateMovement(app)
-        
-def onKeyHold(app,key):
-    myPlayer=app.players[0]
-    if key == 'd' and not myPlayer.inAir:
-        myPlayer.increaseSpeed(10)
-    if key == 'a' and not myPlayer.inAir:
-        myPlayer.increaseSpeed(-10)
-    if key == 'w' and myPlayer.inAir:
-        myPlayer.rotate(10)
-    if key == 's' and myPlayer.inAir:
-        myPlayer.rotate(-10)
-    if key=='space' and not myPlayer.inAir:
-        myPlayer.vy+=100
+        player.checkAirborne()
+        player.updateMovement()
     
 runApp()
