@@ -72,9 +72,11 @@ def drawMap(app):
             fill='red',lineWidth=10)
 
 def drawPlayers(app):
+    playerWidth=50
+    playerHeight=20
     for player in app.players:
-        drawRect(player.cx,player.cy,50,20,
-                 fill=player.team,rotateAngle=player.dir)
+        drawRect(player.cx-playerWidth/2,player.cy-playerHeight/2,playerWidth,
+                 playerHeight,fill=player.team,rotateAngle=player.dir)
         
 def onKeyHold(app, keys):
     myPlayer = app.players[0]
@@ -86,11 +88,9 @@ def onKeyHold(app, keys):
         myPlayer.rotate(5)
     if 's' in keys and myPlayer.inAir:
         myPlayer.rotate(-5)
-
-def onKeyPress(app, key):
-    myPlayer = app.players[0]
-    if key == 'space' and not(myPlayer.inAir):
+    if 'space' in keys and not myPlayer.inAir:
         myPlayer.jump()
+
 
 def onStep(app):
     for player in app.players:

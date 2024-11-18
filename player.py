@@ -15,6 +15,7 @@ class Player:
         self.team = team
         self.inAir = False
         self.speed = 250
+        self.playerHeight = 20
 
     def moveLeft(self):
         if not self.inAir:
@@ -39,10 +40,9 @@ class Player:
         self.dir += angle
 
     def checkAirborne(self):
-        playerHeight=20
-        if self.cy >= self.app.mapBottom - playerHeight and self.vy>0:
+        if abs(self.cy - self.app.mapBottom) <= self.playerHeight/2 + 1:
             self.inAir = False
-            self.cy = self.app.mapBottom - playerHeight
+            self.cy = self.app.mapBottom - self.playerHeight/2
             self.vy = 0
         else:
             self.inAir = True
@@ -52,14 +52,16 @@ class Player:
 
         if self.inAir:
             self.vy += gravity * DT
+            self.cy += self.vy * DT
         else:
             self.vy = 0
+            self.dir=0
 
         self.cx += self.vx * DT
-        self.cy += self.vy * DT
         
         self.cx = max(self.app.mapLeft, min(self.cx, self.app.mapRight))
-        self.cy = max(self.app.mapTop, min(self.cy, self.app.mapBottom))
+        self.cy = max(self.app.mapTop, 
+                  min(self.cy, self.app.mapBottom - self.playerHeight/2))
 
     def __repr__(self):
         return f'''Car is on team {self.team} at position: {self.cx}, 
