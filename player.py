@@ -40,17 +40,15 @@ class Player:
         self.dir += angle
 
     def checkAirborne(self):
-        if abs(self.cy - self.app.mapBottom) <= self.playerHeight/2 + 1:
+        if abs(self.cy - self.app.mapBottom) <= self.playerHeight/2 + 1 :
             self.inAir = False
-            self.cy = self.app.mapBottom - self.playerHeight/2
-            self.vy = 0
         else:
             self.inAir = True
 
     def updateMovement(self):
         gravity = 200
 
-        if self.inAir:
+        if self.inAir or self.vy < 0:
             self.vy += gravity * DT
             self.cy += self.vy * DT
         else:
