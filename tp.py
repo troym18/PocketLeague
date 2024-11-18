@@ -21,26 +21,44 @@ def drawMap(app):
     borderWidth=5
 
     #Map edges
-    drawLine(app.mapLeft + app.cornerRadius, app.mapTop, app.mapRight - app.cornerRadius, app.mapTop, fill=border, lineWidth=borderWidth)
-    drawLine(app.mapLeft + app.cornerRadius, app.mapBottom, app.mapRight - app.cornerRadius, app.mapBottom, fill=border, lineWidth=borderWidth)
-    drawLine(app.mapLeft, app.mapTop + app.cornerRadius, app.mapLeft, app.mapBottom - app.cornerRadius, fill=border, lineWidth=borderWidth)
-    drawLine(app.mapRight, app.mapTop + app.cornerRadius, app.mapRight, app.mapBottom - app.cornerRadius, fill=border, lineWidth=borderWidth)
+    drawLine(app.mapLeft + app.cornerRadius, app.mapTop, 
+             app.mapRight - app.cornerRadius, app.mapTop, 
+             fill=border, lineWidth=borderWidth)
+    drawLine(app.mapLeft + app.cornerRadius, app.mapBottom, 
+             app.mapRight - app.cornerRadius, app.mapBottom, 
+             fill=border, lineWidth=borderWidth)
+
+    drawLine(app.mapLeft, app.mapTop + app.cornerRadius, 
+             app.mapLeft, app.mapBottom - app.cornerRadius, 
+             fill=border, lineWidth=borderWidth)
+    drawLine(app.mapRight, app.mapTop + app.cornerRadius, 
+             app.mapRight, app.mapBottom - app.cornerRadius, 
+             fill=border, lineWidth=borderWidth)
 
     #Rounded Corners
-    drawArc(app.mapLeft + app.cornerRadius, app.mapTop + app.cornerRadius, app.cornerRadius*2+4, app.cornerRadius*2+4, 
+    drawArc(app.mapLeft + app.cornerRadius, app.mapTop + app.cornerRadius, 
+            app.cornerRadius*2+4, app.cornerRadius*2+4, 
             90, 90, fill=None, border=border, borderWidth=borderWidth)
-    drawArc(app.mapRight - app.cornerRadius, app.mapTop + app.cornerRadius, app.cornerRadius*2+4, app.cornerRadius*2+4, 
+    drawArc(app.mapRight - app.cornerRadius, app.mapTop + app.cornerRadius, 
+            app.cornerRadius*2+4, app.cornerRadius*2+4, 
             0, 90, fill=None, border=border, borderWidth=borderWidth)
-    drawArc(app.mapRight - app.cornerRadius, app.mapBottom - app.cornerRadius, app.cornerRadius*2+4, app.cornerRadius*2+4, 
+    drawArc(app.mapRight - app.cornerRadius, app.mapBottom - app.cornerRadius, 
+            app.cornerRadius*2+4, app.cornerRadius*2+4, 
             270, 90, fill=None, border=border, borderWidth=borderWidth)
-    drawArc(app.mapLeft + app.cornerRadius, app.mapBottom - app.cornerRadius, app.cornerRadius*2+4, app.cornerRadius*2+4, 
+    drawArc(app.mapLeft + app.cornerRadius, app.mapBottom - app.cornerRadius, 
+            app.cornerRadius*2+4, app.cornerRadius*2+4, 
             180, 90, fill=None, border=border, borderWidth=borderWidth)
     
     #Fill in corners
-    drawCircle(app.mapLeft + app.cornerRadius, app.mapTop + app.cornerRadius, app.cornerRadius-3, fill='white')
-    drawCircle(app.mapRight - app.cornerRadius, app.mapTop + app.cornerRadius, app.cornerRadius-3, fill='white')
-    drawCircle(app.mapRight - app.cornerRadius, app.mapBottom - app.cornerRadius, app.cornerRadius-3, fill='white')
-    drawCircle(app.mapLeft + app.cornerRadius, app.mapBottom - app.cornerRadius, app.cornerRadius-3, fill='white')
+    drawCircle(app.mapLeft + app.cornerRadius, app.mapTop + app.cornerRadius, 
+               app.cornerRadius-3, fill='white')
+    drawCircle(app.mapRight - app.cornerRadius, app.mapTop + app.cornerRadius, 
+               app.cornerRadius-3, fill='white')
+    drawCircle(app.mapRight - app.cornerRadius, 
+               app.mapBottom - app.cornerRadius, app.cornerRadius-3, 
+               fill='white')
+    drawCircle(app.mapLeft + app.cornerRadius, app.mapBottom - app.cornerRadius, 
+               app.cornerRadius-3, fill='white')
 
     #Blue and Orange goals
     topGoalY=app.height/2+100
@@ -55,7 +73,8 @@ def drawMap(app):
 
 def drawPlayers(app):
     for player in app.players:
-        drawRect(player.cx,player.cy,50,20,fill=player.team,rotateAngle=player.dir)
+        drawRect(player.cx,player.cy,50,20,
+                 fill=player.team,rotateAngle=player.dir)
         
 def onKeyHold(app, keys):
     myPlayer = app.players[0]

@@ -62,4 +62,5 @@ class Player:
         self.cy = max(self.app.mapTop, min(self.cy, self.app.mapBottom))
 
     def __repr__(self):
-        return f'Car is on team {self.team} at position: {self.cx}, {self.cy} in direction {self.dir}'
+        return f'''Car is on team {self.team} at position: {self.cx}, 
+                 {self.cy} in direction {self.dir}'''
