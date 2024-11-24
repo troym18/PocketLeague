@@ -1,3 +1,4 @@
+import math
 DT = 1/60
 
 
@@ -15,9 +16,10 @@ class Player:
         self.team = team
         self.inAir = False
         self.speed = 250
-        self.playerHeight = 20
+        self.height = 20
+        self.width = 50
         #Vector normal to surface player is on
-        self.normal=(1,0)
+        self.normal=[0,1]
 
     def moveLeft(self):
         if not self.inAir:
@@ -42,7 +44,7 @@ class Player:
         self.dir += angle
 
     def checkAirborne(self):
-        if abs(self.cy - self.app.mapBottom) <= self.playerHeight/2 + 1 :
+        if abs(self.cy - self.app.mapBottom) <= self.height/2 + 1 :
             self.inAir = False
         else:
             self.inAir = True
@@ -58,10 +60,24 @@ class Player:
             self.dir=0
 
         self.cx += self.vx * DT
+
+        self.checkBoundary()
+
+    def checkBoundary(self):
+        if (distance (self.cx, self.cy, self.app.BLCircle[0], self.app.BLCircle[1]) > self.app.cornerRadius 
+        and self.cx < self.app.BLCircle[0] and self.cy > self.app.BLCircle[1]):
+            #Put player center on point closest to circle
+            # Calculate the angle between the player and the circle's center
+            angle = math.atan2(self.cy - self.app.BLCircle[0], self.cx - self.app.BLCircle[1])
         
-        self.cx = max(self.app.mapLeft, min(self.cx, self.app.mapRight))
-        self.cy = max(self.app.mapTop, 
-                  min(self.cy, self.app.mapBottom - self.playerHeight/2))
+            # Place the player on the edge of the circle
+            self.cx = self.app.BLCircle[0] + self.app.cornerRadius * math.cos(angle)
+            self.cy = self.app.BLCircle[1] + self.app.cornerRadius * math.sin(angle)
+        else:
+            self.cx = max(self.app.mapLeft + self.width/2, 
+                    min(self.cx, self.app.mapRight - self.width/2))
+            self.cy = max(self.app.mapTop + self.height/2 , 
+                    min(self.cy, self.app.mapBottom - self.height/2))
 
     def __repr__(self):
         return f'''Car is on team {self.team} at position: {self.cx}, 

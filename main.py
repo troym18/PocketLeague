@@ -1,5 +1,6 @@
 from cmu_graphics import *
 from player import Player
+import math
 
 def onAppStart(app):
     app.width = 1200
@@ -11,6 +12,12 @@ def onAppStart(app):
     app.mapRight=1175
     app.mapBottom=725
     app.players=[Player(100,app.mapBottom-50,0,'blue',app)]
+    app.TRCircle = [app.mapRight - app.cornerRadius, app.mapTop + app.cornerRadius]
+    app.TLCircle = [app.mapLeft + app.cornerRadius, app.mapTop + app.cornerRadius]
+    app.BLCircle = [app.mapLeft + app.cornerRadius, app.mapBottom - app.cornerRadius]
+    app.BRCircle = [app.mapRight - app.cornerRadius, app.mapBottom - app.cornerRadius]
+    app.circles = [app.TRCircle, app.TLCircle, app.BLCircle, app.BRCircle]
+
 
 def redrawAll(app):
     drawMap(app)
@@ -21,44 +28,33 @@ def drawMap(app):
     borderWidth=5
 
     #Map edges
-    drawLine(app.mapLeft + app.cornerRadius, app.mapTop, 
-             app.mapRight - app.cornerRadius, app.mapTop, 
+    drawLine(app.TLCircle[0], app.mapTop, 
+             app.TRCircle[0], app.mapTop, 
              fill=border, lineWidth=borderWidth)
-    drawLine(app.mapLeft + app.cornerRadius, app.mapBottom, 
-             app.mapRight - app.cornerRadius, app.mapBottom, 
+    drawLine(app.BLCircle[0], app.mapBottom, 
+             app.BRCircle[0], app.mapBottom, 
              fill=border, lineWidth=borderWidth)
 
-    drawLine(app.mapLeft, app.mapTop + app.cornerRadius, 
-             app.mapLeft, app.mapBottom - app.cornerRadius, 
+    drawLine(app.mapLeft, app.TLCircle[1], 
+             app.mapLeft, app.BLCircle[1], 
              fill=border, lineWidth=borderWidth)
-    drawLine(app.mapRight, app.mapTop + app.cornerRadius, 
-             app.mapRight, app.mapBottom - app.cornerRadius, 
+    drawLine(app.mapRight, app.TRCircle[1], 
+             app.mapRight, app.BRCircle[1], 
              fill=border, lineWidth=borderWidth)
 
     #Rounded Corners
-    drawArc(app.mapLeft + app.cornerRadius, app.mapTop + app.cornerRadius, 
-            app.cornerRadius*2+4, app.cornerRadius*2+4, 
-            90, 90, fill=None, border=border, borderWidth=borderWidth)
-    drawArc(app.mapRight - app.cornerRadius, app.mapTop + app.cornerRadius, 
-            app.cornerRadius*2+4, app.cornerRadius*2+4, 
-            0, 90, fill=None, border=border, borderWidth=borderWidth)
-    drawArc(app.mapRight - app.cornerRadius, app.mapBottom - app.cornerRadius, 
-            app.cornerRadius*2+4, app.cornerRadius*2+4, 
-            270, 90, fill=None, border=border, borderWidth=borderWidth)
-    drawArc(app.mapLeft + app.cornerRadius, app.mapBottom - app.cornerRadius, 
-            app.cornerRadius*2+4, app.cornerRadius*2+4, 
-            180, 90, fill=None, border=border, borderWidth=borderWidth)
+    sweepAngle=90
+    startAngle=0
+    for circle in app.circles:
+        drawArc(circle[0], circle[1], app.cornerRadius*2+4, 
+                app.cornerRadius*2+4, startAngle, sweepAngle, 
+                fill=None, border=border, borderWidth=borderWidth)
+        startAngle+=90
     
     #Fill in corners
-    drawCircle(app.mapLeft + app.cornerRadius, app.mapTop + app.cornerRadius, 
-               app.cornerRadius-3, fill='white')
-    drawCircle(app.mapRight - app.cornerRadius, app.mapTop + app.cornerRadius, 
-               app.cornerRadius-3, fill='white')
-    drawCircle(app.mapRight - app.cornerRadius, 
-               app.mapBottom - app.cornerRadius, app.cornerRadius-3, 
-               fill='white')
-    drawCircle(app.mapLeft + app.cornerRadius, app.mapBottom - app.cornerRadius, 
-               app.cornerRadius-3, fill='white')
+    for circle in app.circles:
+        drawCircle(circle[0], circle[1], 
+                   app.cornerRadius-3, fill='white')
 
     #Blue and Orange goals
     topGoalY=app.height/2+100
@@ -72,12 +68,12 @@ def drawMap(app):
             fill='red',lineWidth=10)
 
 def drawPlayers(app):
-    playerWidth=50
-    playerHeight=20
     for player in app.players:
         fill = gradient(player.team,'black',start='top')
-        drawRect(player.cx-playerWidth/2,player.cy-playerHeight/2,playerWidth,
-                 playerHeight,fill=fill,rotateAngle=player.dir)
+        drawRect(player.cx-player.width/2,player.cy-player.height/2,player.width,
+                 player.height,fill=fill,rotateAngle=player.dir)
+        drawLine(player.cx, player.cy,player.cx + 50*player.normal[0], 
+                player.cy - 50*player.normal[1])
         
 def onKeyHold(app, keys):
     myPlayer = app.players[0]
