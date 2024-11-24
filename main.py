@@ -11,7 +11,7 @@ def onAppStart(app):
     app.cornerRadius=100
     app.mapRight=1175
     app.mapBottom=725
-    app.players=[Player(100,app.mapBottom-50,0,'blue',app)]
+    app.players=[Player(200,app.mapBottom-50,0,'blue',app)]
     app.TRCircle = [app.mapRight - app.cornerRadius, app.mapTop + app.cornerRadius]
     app.TLCircle = [app.mapLeft + app.cornerRadius, app.mapTop + app.cornerRadius]
     app.BLCircle = [app.mapLeft + app.cornerRadius, app.mapBottom - app.cornerRadius]
