@@ -1,5 +1,6 @@
 from cmu_graphics import *
 from player import Player
+import time
 import math
 
 def onAppStart(app):
@@ -11,7 +12,7 @@ def onAppStart(app):
     app.cornerRadius=100
     app.mapRight=1175
     app.mapBottom=725
-    app.players=[Player(100,app.mapBottom-50,0,'blue',app)]
+    app.players=[Player(200,app.mapBottom-50,0,'blue',app)]
     app.TRCircle = [app.mapRight - app.cornerRadius, app.mapTop + app.cornerRadius]
     app.TLCircle = [app.mapLeft + app.cornerRadius, app.mapTop + app.cornerRadius]
     app.BLCircle = [app.mapLeft + app.cornerRadius, app.mapBottom - app.cornerRadius]
@@ -72,8 +73,10 @@ def drawPlayers(app):
         fill = gradient(player.team,'black',start='top')
         drawRect(player.cx-player.width/2,player.cy-player.height/2,player.width,
                  player.height,fill=fill,rotateAngle=player.dir)
-        drawLine(player.cx, player.cy,player.cx + 50*player.normal[0], 
-                player.cy - 50*player.normal[1])
+        normal = 90 - player.dir
+        normal *= math.pi/180
+        drawLine(player.cx, player.cy,player.cx + 50*math.cos(normal), 
+                player.cy - 50*math.sin(normal))
         
 def onKeyHold(app, keys):
     myPlayer = app.players[0]
@@ -85,8 +88,17 @@ def onKeyHold(app, keys):
         myPlayer.rotate(5)
     if 's' in keys and myPlayer.inAir:
         myPlayer.rotate(-5)
-    if 'space' in keys and not myPlayer.inAir:
-        myPlayer.jump()
+    if 'space' in keys:
+        if not myPlayer.inAir:
+            myPlayer.jump()
+            myPlayer.firstJumpTime = time.time()
+            myPlayer.numJumps = 1
+        elif myPlayer.numJumps > 0:
+            myPlayer.secondJumpTime = time.time()
+            if myPlayer.secondJumpTime - myPlayer.firstJumpTime > 0.4:
+                myPlayer.jump()
+                myPlayer.numJumps -= 1
+        print(myPlayer.numJumps)
 
 
 def onStep(app):
@@ -95,5 +107,6 @@ def onStep(app):
         player.updateMovement()
         if not player.inAir:
             player.decelerate()
+            player.numJumps = 1
     
 runApp()
