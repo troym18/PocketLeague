@@ -2,15 +2,10 @@ import math
 import time
 
 DT = 1 / 60
+CONVERSION = math.pi/180
 
 def distance(x1, y1, x2, y2):
     return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
-
-def normalize(vector):
-    magnitude = math.sqrt(vector[0]**2 + vector[1]**2)
-    if magnitude == 0:
-        return [0, 0]
-    return [vector[0] / magnitude, vector[1] / magnitude]
 
 class Player:
     def __init__(self, centerX, centerY, direction, team, app):
@@ -25,128 +20,121 @@ class Player:
         self.speed = 250
         self.height = 20
         self.width = 50
-        self.numJumps = 1
+        self.numJumps = 0
         self.firstJumpTime = 0
         self.secondJumpTime = 0
+        self.touchingBLCircle = False
+        self.touchingBRCircle = False
+        self.touchingTLCircle = False
+        self.touchingTRCircle = False
 
     def moveLeft(self):
-        if not self.inAir:
-            # Move left along the surface's tangent direction
-            tangent = [-self.normal[1], self.normal[0]]  # Perpendicular to normal
-            self.vx = tangent[0] * -self.speed
-            self.vy = tangent[1] * -self.speed
+        self.vx = self.speed * -math.cos(self.dir * CONVERSION)
+        self.vy = self.speed * math.sin(self.dir * CONVERSION)
 
     def moveRight(self):
-        if not self.inAir:
-            # Move right along the surface's tangent direction
-            tangent = [self.normal[1], -self.normal[0]]  # Perpendicular to normal
-            self.vx = tangent[0] * self.speed
-            self.vy = tangent[1] * self.speed
+        self.vx = self.speed * math.cos(self.dir * CONVERSION)
+        self.vy = self.speed * -math.sin(self.dir * CONVERSION)
 
     def decelerate(self):
-        # Gradually reduce velocity components when grounded
-        if abs(self.vx) > 50 or abs(self.vy) > 50:
-            decelerationFactor = normalize([self.vx, self.vy])
-            self.vx -= decelerationFactor[0] * 50
-            self.vy -= decelerationFactor[1] * 50
+        if abs(self.vx) > 20 or abs(self.vy) > 20:
+            self.vx *= 0.5
+            self.vy *= 0.5
         else:
             self.vx, self.vy = 0, 0
+        return
 
     def jump(self):
+        jumpStrength = 300
         normal = 90 - self.dir
-        normal *= math.pi / 180
-        self.vy = -200 * math.sin(normal)
-        self.vx = 200 * math.cos(normal)
+        self.vy -= jumpStrength * math.sin(normal * CONVERSION)
+        self.vx += jumpStrength * math.cos(normal * CONVERSION)
+        self.inAir = True
 
     def rotate(self, angle):
-        # Rotate player orientation based on angle (for aerial control)
         self.dir += angle
 
     def checkAirborne(self):
-        # Check if player is airborne by comparing distance to ground or surface
-        grounded = False
-
-        # Check flat boundaries (floor/ceiling/walls)
-        if abs(self.cy - self.app.mapBottom) <= (self.height / 2 + 1):  # Floor check
-            grounded = True
-            self.normal = [0, 1]
+        tolerance = 5
         
-        elif abs(self.cy - self.app.mapTop) <= (self.height / 2 + 1):  # Ceiling check
-            grounded = True
-            self.normal = [0, -1]
-        
-        elif abs(self.cx - self.app.mapLeft) <= (self.width / 2 + 1):  # Left wall check
-            grounded = True
-            self.normal = [1, 0]
-        
-        elif abs(self.cx - self.app.mapRight) <= (self.width / 2 + 1):  # Right wall check
-            grounded = True
-            self.normal = [-1, 0]
+        isGrounded = (
+            abs(self.cy - (self.app.mapBottom - self.height / 2)) <= tolerance
+            and self.vy >= 0
+        )
+        touchingLeftWall = (
+            abs(self.cx - (self.app.mapLeft + self.width / 2)) <= tolerance
+            and self.vx < 0
+        )
+        touchingRightWall = (
+            abs(self.cx - (self.app.mapRight - self.width / 2)) <= tolerance
+            and self.vx > 0
+        )
+        touchingCeiling = (
+            abs(self.cy - (self.app.mapTop + self.height / 2)) <= tolerance
+            and self.vy < 0
+        )
+        self.touchingBLCircle=(
+            distance (self.cx, self.cy, self.app.BLCircle[0], self.app.BLCircle[1]) >= self.app.cornerRadius 
+                    and self.cx < self.app.BLCircle[0] and self.cy > self.app.BLCircle[1]
+        )
+        self.touchingBRCircle=(
+            distance (self.cx, self.cy, self.app.BRCircle[0], self.app.BRCircle[1]) >= self.app.cornerRadius 
+                    and self.cx > self.app.BRCircle[0] and self.cy > self.app.BRCircle[1]
+        )
+        self.touchingTLCircle=(
+            distance (self.cx, self.cy, self.app.TLCircle[0], self.app.TLCircle[1]) >= self.app.cornerRadius 
+                    and self.cx < self.app.TLCircle[0] and self.cy < self.app.TLCircle[1]
+        )
+        self.touchingTRCircle=(
+            distance (self.cx, self.cy, self.app.TRCircle[0], self.app.TRCircle[1]) >= self.app.cornerRadius 
+                    and self.cx > self.app.TRCircle[0] and self.cy < self.app.TRCircle[1]
+        )
+        self.inAir = not (isGrounded or touchingLeftWall or touchingRightWall or touchingCeiling 
+                        or self.touchingBLCircle or self.touchingBRCircle or
+                        self.touchingTLCircle or self.touchingTRCircle)
 
-        # Check circular boundaries (corners)
-        for circle in [self.app.TLCircle, 
-                       self.app.TRCircle,
-                       self.app.BLCircle,
-                       self.app.BRCircle]:
-            
-            distanceToCircleCenter = distance(self.cx, 
-                                              self.cy,
-                                              circle[0],
-                                              circle[1])
-            
-            if distanceToCircleCenter <= (self.app.cornerRadius + (self.height / 2)):
-                angleToCenter = math.atan2(self.cy - circle[1], circle[0] - self.cx)
-                outwardNormalX = math.cos(angleToCenter)
-                outwardNormalY = math.sin(angleToCenter)
-                self.normal = normalize([outwardNormalX, outwardNormalY])
-                grounded = True
-
-        # Update airborne status based on checks above
-        self.inAir = not grounded
-
+    
     def updateMovement(self):
-        gravityStrength = 200
-
-        if not self.inAir:
-            # Align player direction with surface normal when grounded
-            normalizedNormal = normalize(self.normal)
-            angleToNormal = math.atan2(normalizedNormal[1], normalizedNormal[0])
-            self.dir = math.degrees(angleToNormal)
-        
+        gravity = 200
+        if self.inAir:
+            self.vy += gravity * DT
         else:
-            # Apply gravity in world space when airborne
-            gravityVector = [0, gravityStrength]
-            normalizedGravityVector = normalize(gravityVector)
-            self.vx += normalizedGravityVector[0] * DT * gravityStrength
-            self.vy += normalizedGravityVector[1] * DT * gravityStrength
+            if abs(self.vy) < 20:
+                self.vy = 0
+            if abs(self.vx) < 20:
+                self.vx = 0
         
-        # Update position based on velocity and time step
         self.cx += self.vx * DT
         self.cy += self.vy * DT
 
-        # Check boundaries and adjust position accordingly after movement
         self.checkBoundary()
 
     def checkBoundary(self):
-        for circle in [self.app.TLCircle,
-                       self.app.TRCircle,
-                       self.app.BLCircle,
-                       self.app.BRCircle]:
-            
-            distanceToCircleCenter = distance(self.cx,
-                                              self.cy,
-                                              circle[0],
-                                              circle[1])
-            
-            if distanceToCircleCenter <= (self.app.cornerRadius + (self.height / 2)):
-                angleToCenter = math.atan2(self.cy - circle[1], circle[0] - self.cx)
-                edgeX = circle[0] + math.cos(angleToCenter) * (self.app.cornerRadius)
-                edgeY = circle[1] + math.sin(angleToCenter) * (self.app.cornerRadius)
+        # Check each corner circle for boundary violations
+        if (self.touchingBLCircle or self.touchingBRCircle or
+            self.touchingTLCircle or self.touchingTRCircle):
 
-                outwardNormalX = edgeX - circle[0]
-                outwardNormalY = edgeY - circle[1]
-                outwardNormalVector = normalize([outwardNormalX, outwardNormalY])
+            angleToCenter = math.atan2(self.cy - self.app.BLCircle[1], self.cx - self.app.BLCircle[0]) * 1/CONVERSION
+            self.dir = angleToCenter - 90
+            self.cx = self.app.BLCircle[0] + self.app.cornerRadius * math.cos(angleToCenter * CONVERSION)
+            self.cy = self.app.BLCircle[1] + self.app.cornerRadius * math.sin(angleToCenter * CONVERSION)
+        
+        else:
+            # Handle rectangle boundaries (edges of the map outside corner circles)
+            self.cx = max(self.app.mapLeft + self.width / 2, 
+                            min(self.cx, self.app.mapRight - self.width / 2))
+            self.cy = max(self.app.mapTop + self.height / 2, 
+                            min(self.cy, self.app.mapBottom - self.height / 2))
+            if abs(self.cx - self.app.mapLeft) < self.width + 2:
+                self.dir = 90
+            if abs(self.cx - self.app.mapRight) < self.width + 2:
+                self.dir = 270
+            if abs(self.cy - self.app.mapTop) < self.height + 2:
+                self.dir = 180
+            if abs(self.cy - self.app.mapBottom) < self.height + 2:
+                self.dir = 0
 
-                # Snap player to edge of circle and update normal vector.
-                self.cx, self.cy = edgeX, edgeY
-                self.normal= outwardNormalVector
+
+    def __repr__(self):
+        return f'''Car is on team {self.team} at position: {self.cx}, 
+                 {self.cy} in direction {self.dir}'''

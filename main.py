@@ -1,7 +1,10 @@
 from cmu_graphics import *
 from player import Player
+from ball import Ball
 import time
 import math
+DT = 1 / 60
+CONVERSION = math.pi / 180
 
 def onAppStart(app):
     app.width = 1200
@@ -18,11 +21,17 @@ def onAppStart(app):
     app.BLCircle = [app.mapLeft + app.cornerRadius, app.mapBottom - app.cornerRadius]
     app.BRCircle = [app.mapRight - app.cornerRadius, app.mapBottom - app.cornerRadius]
     app.circles = [app.TRCircle, app.TLCircle, app.BLCircle, app.BRCircle]
+    app.ball = Ball(app.width//2, app.height//2, )
 
+def redrawAll_start(app):
 
 def redrawAll(app):
     drawMap(app)
     drawPlayers(app)
+    drawBall(app)
+
+def drawBall(app):
+    drawCircle(app.ball.cx, app.ball.cy, app.ball.r, fill='grey')
 
 def drawMap(app):
     border='black'
@@ -39,6 +48,7 @@ def drawMap(app):
     drawLine(app.mapLeft, app.TLCircle[1], 
              app.mapLeft, app.BLCircle[1], 
              fill=border, lineWidth=borderWidth)
+             
     drawLine(app.mapRight, app.TRCircle[1], 
              app.mapRight, app.BRCircle[1], 
              fill=border, lineWidth=borderWidth)
@@ -74,15 +84,14 @@ def drawPlayers(app):
         drawRect(player.cx-player.width/2,player.cy-player.height/2,player.width,
                  player.height,fill=fill,rotateAngle=player.dir)
         normal = 90 - player.dir
-        normal *= math.pi/180
-        drawLine(player.cx, player.cy,player.cx + 50*math.cos(normal), 
-                player.cy - 50*math.sin(normal))
-        
+        drawLine(player.cx, player.cy,player.cx + 50 * math.cos(normal * CONVERSION), 
+                player.cy - 50 * math.sin(normal * CONVERSION))
+         
 def onKeyHold(app, keys):
     myPlayer = app.players[0]
-    if 'd' in keys:
+    if 'd' in keys and not myPlayer.inAir:
         myPlayer.moveRight()
-    elif 'a' in keys:
+    elif 'a' in keys and not myPlayer.inAir:
         myPlayer.moveLeft()
     if 'w' in keys and myPlayer.inAir:
         myPlayer.rotate(5)
@@ -90,23 +99,25 @@ def onKeyHold(app, keys):
         myPlayer.rotate(-5)
     if 'space' in keys:
         if not myPlayer.inAir:
-            myPlayer.jump()
+            myPlayer.jump() 
             myPlayer.firstJumpTime = time.time()
             myPlayer.numJumps = 1
-        elif myPlayer.numJumps > 0:
-            myPlayer.secondJumpTime = time.time()
-            if myPlayer.secondJumpTime - myPlayer.firstJumpTime > 0.4:
+        elif myPlayer.numJumps == 1:
+            currentTime = time.time()
+            if currentTime - myPlayer.firstJumpTime > 0.4:
                 myPlayer.jump()
                 myPlayer.numJumps -= 1
-        print(myPlayer.numJumps)
-
 
 def onStep(app):
+    app.ball.updatePosition(app)
     for player in app.players:
         player.checkAirborne()
         player.updateMovement()
+        app.ball.handlePlayerCollision(player)
         if not player.inAir:
             player.decelerate()
-            player.numJumps = 1
-    
-runApp()
+
+def main():
+    runAppWithScreens(initialScreen='start')
+
+main()
