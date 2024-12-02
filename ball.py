@@ -1,5 +1,6 @@
 from player import Player
 import math
+import random
 
 DT = 1 / 60
 
@@ -13,13 +14,14 @@ def normalize(vector):
     return [vector[0] / magnitude, vector[1] / magnitude]
 
 class Ball:
-    def __init__(self, cx, cy):
+    def __init__(self, cx, cy, app):
         self.cx = cx
         self.cy = cy
         self.r = 30
         self.damping = 0.7
         self.vx = 0
         self.vy = 0
+        self.app = app
     
     def updatePosition(self, app):
         gravity = 200
@@ -31,12 +33,52 @@ class Ball:
         self.handleWallCollision(app)
 
     def handleWallCollision(self, app):
-        if self.cx - self.r < app.mapLeft or self.cx + self.r > app.mapRight:
+        touchingBLCircle=(
+            distance (self.cx, self.cy, self.app.BLCircle[0], self.app.BLCircle[1]) >= self.app.cornerRadius - self.r 
+                    and self.cx < self.app.BLCircle[0] and self.cy > self.app.BLCircle[1]
+        )
+        touchingBRCircle=(
+            distance (self.cx, self.cy, self.app.BRCircle[0], self.app.BRCircle[1]) >= self.app.cornerRadius - self.r 
+                    and self.cx > self.app.BRCircle[0] and self.cy > self.app.BRCircle[1]
+        )
+        touchingTLCircle=(
+            distance (self.cx, self.cy, self.app.TLCircle[0], self.app.TLCircle[1]) >= self.app.cornerRadius - self.r 
+                    and self.cx < self.app.TLCircle[0] and self.cy < self.app.TLCircle[1]
+        )
+        touchingTRCircle=(
+            distance (self.cx, self.cy, self.app.TRCircle[0], self.app.TRCircle[1]) >= self.app.cornerRadius - self.r 
+                    and self.cx > self.app.TRCircle[0] and self.cy < self.app.TRCircle[1]
+        )
+        if touchingBLCircle:
+            self.cx = self.app.BLCircle[0]
+            self.cy = self.app.BLCircle[1]
+            self.vx = random.randrange(100, 400)
+            self.vy = random.randrange(-400, -100)
+        
+        if touchingBRCircle:
+            self.cx = self.app.BRCircle[0]
+            self.cy = self.app.BRCircle[1]
+            self.vx = random.randrange(-400, -100)
+            self.vy = random.randrange(-400, -100)
+        
+        if touchingTLCircle:
+            self.cx = self.app.TLCircle[0]
+            self.cy = self.app.TLCircle[1]
+            self.vx = random.randrange(100, 400)
+            self.vy = random.randrange(100, 400)
+        
+        if touchingTRCircle:
+            self.cx = self.app.TRCircle[0]
+            self.cy = self.app.TRCircle[1]
+            self.vx = random.randrange(-400, -100)
+            self.vy = random.randrange(100, 400)
+            
+        elif self.cx - self.r < app.mapLeft or self.cx + self.r > app.mapRight:
             self.vx *= -self.damping 
             self.cx = max(self.cx, app.mapLeft + self.r)
             self.cx = min(self.cx, app.mapRight - self.r)
 
-        if self.cy - self.r < app.mapTop or self.cy + self.r > app.mapBottom:
+        elif self.cy - self.r < app.mapTop or self.cy + self.r > app.mapBottom:
             self.vy *= -self.damping 
             self.cy = max(self.cy, app.mapTop + self.r)
             self.cy = min(self.cy, app.mapBottom - self.r)
