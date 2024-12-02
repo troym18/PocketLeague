@@ -15,12 +15,11 @@ def onAppStart(app):
     app.mapBottom = 725
     app.topGoalY = app.height/2 - 100
     app.bottomGoalY = app.height/2 + 100
-    app.TRCircle = [app.mapRight - app.cornerRadius, app.mapTop + app.cornerRadius]
-    app.TLCircle = [app.mapLeft + app.cornerRadius, app.mapTop + app.cornerRadius]
-    app.BLCircle = [app.mapLeft + app.cornerRadius, app.mapBottom - app.cornerRadius]
-    app.BRCircle = [app.mapRight - app.cornerRadius, app.mapBottom - app.cornerRadius]
+    app.TRCircle = [app.mapRight - app.cornerRadius, app.mapTop + app.cornerRadius, False]
+    app.TLCircle = [app.mapLeft + app.cornerRadius, app.mapTop + app.cornerRadius, False]
+    app.BLCircle = [app.mapLeft + app.cornerRadius, app.mapBottom - app.cornerRadius, False]
+    app.BRCircle = [app.mapRight - app.cornerRadius, app.mapBottom - app.cornerRadius, False]
     app.circles = [app.TRCircle, app.TLCircle, app.BLCircle, app.BRCircle]
-
 #START
 
 def start_redrawAll(app):
@@ -52,13 +51,56 @@ def start_onMousePress(app, mouseX, mouseY):
         setActiveScreen('multiplayerStart')
     if (app.width/2 - buttonWidth/2 <= mouseX <= app.width/2 + buttonWidth/2 and
         500 <= mouseY <= 500 + buttonHeight):
-        setActiveScreen('howTo')
+        setActiveScreen('instructions')
 
 #END START
-#HOW TO PLAY
+#INSTRUCTIONS
+def instructions_redrawAll(app):
+    instructions = [
+        "The game is Rocket League. You are a car.",
+        "You can drive, jump, boost, and flip your car in any way.",
+        "Your goal is to score against your opponent by hitting",
+        "the ball into the goal opposite your corner. You can",
+        "use the corners to your advantage, as they act like",
+        "bumpers and give a speed boost into the air.",
+        "",
+        "Good luck!"
+    ]
 
-def howTo_redrawAll(app):
-    drawLabel("Keys", app.width/2, 50, size = 50, font = 'monospace',
+    buttonWidth = 300
+    buttonHeight = 75
+
+    drawLabel("Instructions", app.width / 2, 50, size=50, font="monospace", 
+             fill=gradient("blue", "orange", start="left"))
+
+    y = 150
+    for line in instructions:
+        drawLabel(line, app.width / 2, y, size=20, font="monospace", fill="black")
+        y += 30
+
+    drawLabel("Keybinds", app.width / 2, 500 + buttonHeight / 2, 
+              size=30, font="monospace")
+    drawRect(app.width / 2 - buttonWidth / 2, 500, buttonWidth, 
+             buttonHeight, fill=None, border="black")
+    drawLabel("Esc to return", 100, 50, size=20, font="monospace")
+
+
+def instructions_onMousePress(app, mouseX, mouseY):
+    buttonWidth = 300
+    buttonHeight = 75
+    if (app.width/2 - buttonWidth/2 <= mouseX <= app.width/2 + buttonWidth/2 and
+        500 <= mouseY <= 500 + buttonHeight):
+        setActiveScreen('keybinds')
+    
+def instructions_onKeyPress(app, key):
+    if key == 'escape':
+        setActiveScreen('start')
+
+#INSTRUCTIONS END
+#KEYBINDS
+
+def keybinds_redrawAll(app):
+    drawLabel("Keybinds", app.width/2, 50, size = 50, font = 'monospace',
               fill = gradient('blue', 'orange', start='left'))
     drawLabel('Singleplayer',app.width/2, 100, 
              size= 30, font = 'monospace')
@@ -90,11 +132,11 @@ def howTo_redrawAll(app):
              size= 25, font = 'monospace')
     drawLabel('Esc to return', 100, 50, size = 20, font = 'monospace')
 
-def howTo_onKeyPress(app, key):
+def keybinds_onKeyPress(app, key):
     if key == 'escape':
         setActiveScreen('start')
 
-#END HOW TO PLAY
+#END KEYBINDS
 #MULTIPLAYER START
 
 def multiplayerStart_redrawAll(app):
@@ -140,6 +182,8 @@ def training_onScreenActivate(app):
     app.players =[Player(200, app.mapBottom - 10,0, 'gray', app)]
     app.ball = Ball(app.width//2, app.height//2, app)
     app.scored = False
+    app.delay = 0
+    app.closeScore = False
 
 def training_redrawAll(app):
     drawLabel("Training Mode", app.width/2, 20, size = 30, font = 'monospace')
@@ -150,6 +194,9 @@ def training_redrawAll(app):
     if app.scored:
         drawLabel('GOAL!', app.width/2, app.height/2, size = 50, 
         font = 'monospace', fill = gradient('orange','blue',start = 'left'))
+    if app.closeScore:
+        drawLabel(f'Close Call!', app.width/2, app.height - 50, size = 30, 
+                  font = 'monospace')
          
 def training_onKeyHold(app, keys):
     myPlayer = app.players[0]
@@ -188,10 +235,14 @@ def training_onStep(app):
         time.sleep(1.5)
         training_onScreenActivate(app)
     app.ball.updatePosition(app)
-    if ((app.ball.cx + app.ball.r >= app.mapRight 
-    or app.ball.cx - app.ball.r <= app.mapLeft)
-    and app.topGoalY + app.ball.r <= app.ball.cy <= app.bottomGoalY - app.ball.r):
-        app.scored = True
+    if (app.ball.cx + app.ball.r >= app.mapRight or 
+          app.ball.cx - app.ball.r <= app.mapLeft and 
+          app.topGoalY <= app.ball.cy <= app.bottomGoalY):
+        if (app.topGoalY + app.ball.r <= app.ball.cy <= app.bottomGoalY - app.ball.r):
+            app.scored = True
+        else:
+            app.closeScore = True
+            app.delay = time.time()
     myPlayer = app.players[0]
     myPlayer.updateBoostState()
     myPlayer.checkAirborne()
@@ -199,6 +250,12 @@ def training_onStep(app):
     app.ball.handlePlayerCollision(myPlayer)
     if not myPlayer.inAir:
         myPlayer.decelerate()
+    currentTime = time.time()
+    if abs(currentTime - app.delay) > 1:
+        app.closeScore = False
+    for circle in app.circles:
+        if circle[2] and abs(time.time() - app.bumperDelay) > 0.5:
+            circle[2] = False
 
 #END TRAINING MODE
 #1v1 PLAYER MODE
@@ -206,13 +263,14 @@ def training_onStep(app):
 def oneVPlayer_onScreenActivate(app):
     app.players = [Player(200,app.mapBottom - 10, 0,'blue', app), 
     Player(app.width - 200, app.mapBottom - 10, 0, 'orange', app)]
-    app.ball = Ball(app.width//2, app.height//2, app)
+    app.ball = Ball(app.width//2, 625, app)
     app.timer = 120 #2 min timer
     app.blueScore = 0
     app.orangeScore = 0
     app.countdown = 240
     app.counter = 0
     app.scored = False
+    app.closeScore = False
 
 def activateKickoff(app):
     app.scored = False
@@ -248,24 +306,27 @@ def oneVPlayer_redrawAll(app):
     if app.scored:
         drawLabel('GOAL!', app.width/2, app.height/2, size = 50, 
         font = 'monospace', fill = gradient('orange','blue',start = 'left'))
+    elif app.closeScore:
+        drawLabel('Close Call!', app.width/2, app.height - 50, size = 30, 
+                  font = 'monospace')
     if app.timer == 0:
         if app.blueScore == app.orangeScore:
             drawLabel('Tie! Esc to go back, r to restart!', app.width/2,
-            app.height/2, size = 50, font = 'monospace')
+            app.height/2, size = 30, font = 'monospace')
         elif app.blueScore > app.orangeScore:
             drawLabel('Blue Wins! Esc to go back, r to restart!', app.width/2,
-            app.height/2, size = 50, font = 'monospace')
+            app.height/2, size = 30, font = 'monospace')
         else:
             drawLabel('Orange Wins! Esc to go back, r to restart!', app.width/2,
-            app.height/2, size = 50, font = 'monospace')
+            app.height/2, size = 30, font = 'monospace')
             
 def oneVPlayer_onKeyHold(app, keys):
     player1 = app.players[0]
     player2 = app.players[1]
-    if app.countdown == 0:
+    if app.countdown == 0 and app.timer != 0:
         if 'd' in keys and not player1.inAir:
             player1.moveRight()
-        elif 'a' in keys and not player1.inAir:
+        if 'a' in keys and not player1.inAir:
             player1.moveLeft()
         if 'w' in keys and player1.inAir:
             player1.rotate(5)
@@ -326,17 +387,27 @@ def oneVPlayer_onStep(app):
         if app.scored:
             time.sleep(1.5)
             activateKickoff(app)
+        if app.closeScore and app.delay - app.timer > 2:
+            app.closeScore = False
         if app.counter % 60 == 1:
             app.timer -= 1
         if (app.ball.cx + app.ball.r >= app.mapRight and 
         app.topGoalY + app.ball.r <= app.ball.cy <= app.bottomGoalY - app.ball.r):
             app.scored = True
             app.blueScore +=1
-        if (app.ball.cx - app.ball.r <= app.mapLeft and 
+        elif (app.ball.cx - app.ball.r <= app.mapLeft and 
         app.topGoalY + app.ball.r <= app.ball.cy <= app.bottomGoalY - app.ball.r):
             app.scored = True
             app.orangeScore +=1
+        elif (app.ball.cx + app.ball.r >= app.mapRight or 
+        app.ball.cx - app.ball.r <= app.mapLeft and 
+        app.topGoalY <= app.ball.cy <= app.bottomGoalY):
+            app.closeScore = True
+            app.delay = app.timer
         app.ball.updatePosition(app)
+        for circle in app.circles:
+            if circle[2] and abs(time.time() - app.bumperDelay) > 0.5:
+                circle[2] = False
         for player in app.players:
             player.updateBoostState()
             player.checkAirborne()
@@ -344,9 +415,9 @@ def oneVPlayer_onStep(app):
             app.ball.handlePlayerCollision(player)
             if not player.inAir:
                 player.decelerate()
-        app.counter += 1
     elif app.countdown > 0:
         app.countdown -= 1
+    app.counter += 1
 
 #END 1v1 PLAYER MODE
 #GENERAL FUNCTIONS
@@ -382,15 +453,25 @@ def drawMap(app):
             teamColor= 'orange'
         else:
             teamColor = 'blue'
-        drawArc(circle[0], circle[1], app.cornerRadius*2+4, 
-                app.cornerRadius*2+4, startAngle, sweepAngle, 
-                fill=None, border=teamColor, borderWidth=borderWidth)
+        if circle[2]:
+            drawArc(circle[0], circle[1], app.cornerRadius*2+4, 
+                    app.cornerRadius*2+4, startAngle, sweepAngle, 
+                    fill = teamColor, 
+                    border = teamColor, borderWidth= borderWidth)
+        else:
+            drawArc(circle[0], circle[1], app.cornerRadius*2+4, 
+                    app.cornerRadius*2+4, startAngle, sweepAngle, 
+                    fill = None, border = teamColor, borderWidth= borderWidth)
         startAngle+=90
     
     #Fill in corners
     for circle in app.circles:
-        drawCircle(circle[0], circle[1], 
-                   app.cornerRadius-3, fill='white')
+        if circle[2]:
+            drawCircle(circle[0], circle[1], 
+                    app.cornerRadius - 10, fill='white')
+        else:
+            drawCircle(circle[0], circle[1], 
+                    app.cornerRadius - 3, fill='white')
 
     #Blue and Orange goals
     drawLine(25, app.topGoalY, 25, app.bottomGoalY, fill='blue', lineWidth=15)
@@ -407,12 +488,11 @@ def drawPlayers(app):
         wheelR = 7
         grad = gradient(player.team,'black', start='top')
         drawRect(player.cx-player.width/2,player.cy-player.height/2,player.width,
-                 player.height, fill=grad,rotateAngle=player.dir)
-        # drawCircle(player.cx + wheelR - 25 * math.cos(math.radians(player.dir)),
-        #             player.cy + wheelR/2 - 25 * math.sin(math.radians(player.dir)), wheelR)
-        normal = 90 - player.dir
-        drawLine(player.cx, player.cy,player.cx + 50 * math.cos(math.radians(normal)), 
-                player.cy - 50 * math.sin(math.radians(normal)))
+                 player.height * 3/4, fill=grad,rotateAngle=player.dir)
+        drawCircle(player.cx - 15 * math.cos(math.radians(player.dir - 20)),
+                    player.cy - 15 * math.sin(math.radians(player.dir - 20)), wheelR)
+        drawCircle(player.cx - 15 * math.cos(math.radians(player.dir - 160)),
+                    player.cy - 15 * math.sin(math.radians(player.dir - 160)), wheelR)
         if player.isBoosting:
             if not player.inAir:
                 drawCircle(player.cx - player.vx // 5, 

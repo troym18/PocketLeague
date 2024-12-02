@@ -127,28 +127,36 @@ class Player:
                     and self.cx > self.app.TRCircle[0] and self.cy < self.app.TRCircle[1]
         )
         if touchingBLCircle:
-            self.vx = random.randrange(100, 300)
-            self.vy = random.randrange(-300, -100)
+            self.vx = random.randrange(250, 350)
+            self.vy = random.randrange(-350, -250)
             self.inAir = True
             self.numJumps = 1
+            self.app.BLCircle[2] = True
+            self.app.bumperDelay = time.time()
         
         if touchingBRCircle:
-            self.vx = random.randrange(-300, -100)
-            self.vy = random.randrange(-300, -100)
+            self.vx = random.randrange(-350, -250)
+            self.vy = random.randrange(-350, -250)
             self.inAir = True
             self.numJumps = 1
+            self.app.BRCircle[2] = True
+            self.app.bumperDelay = time.time()
         
         if touchingTLCircle:
-            self.vx = random.randrange(100, 300)
-            self.vy = random.randrange(100, 300)
+            self.vx = random.randrange(250, 350)
+            self.vy = random.randrange(250, 350)
             self.inAir = True
             self.numJumps = 1
+            self.app.TLCircle[2] = True
+            self.app.bumperDelay = time.time()
         
         if touchingTRCircle:
-            self.vx = random.randrange(-300, -100)
-            self.vy = random.randrange(100, 300)
+            self.vx = random.randrange(-350, -250)
+            self.vy = random.randrange(250, 350)
             self.inAir = True
             self.numJumps = 1
+            self.app.TRCircle[2] = True
+            self.app.bumperDelay = time.time()
         
         else:
             # Handle rectangle boundaries (edges of the map outside corner circles)

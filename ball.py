@@ -1,6 +1,7 @@
 from player import Player
 import math
 import random
+import time
 
 DT = 1 / 60
 
@@ -54,24 +55,32 @@ class Ball:
             self.cy = self.app.BLCircle[1]
             self.vx = random.randrange(100, 400)
             self.vy = random.randrange(-400, -100)
+            self.app.BLCircle[2] = True
+            self.app.bumperDelay = time.time()
         
         if touchingBRCircle:
             self.cx = self.app.BRCircle[0]
             self.cy = self.app.BRCircle[1]
             self.vx = random.randrange(-400, -100)
             self.vy = random.randrange(-400, -100)
+            self.app.BRCircle[2] = True
+            self.app.bumperDelay = time.time()
         
         if touchingTLCircle:
             self.cx = self.app.TLCircle[0]
             self.cy = self.app.TLCircle[1]
             self.vx = random.randrange(100, 400)
             self.vy = random.randrange(100, 400)
+            self.app.TLCircle[2] = True
+            self.app.bumperDelay = time.time()
         
         if touchingTRCircle:
             self.cx = self.app.TRCircle[0]
             self.cy = self.app.TRCircle[1]
             self.vx = random.randrange(-400, -100)
             self.vy = random.randrange(100, 400)
+            self.app.TRCircle[2] = True
+            self.app.bumperDelay = time.time()
             
         elif self.cx - self.r < app.mapLeft or self.cx + self.r > app.mapRight:
             self.vx *= -self.damping 
@@ -87,7 +96,16 @@ class Ball:
     def handlePlayerCollision(self, player):
         nearestX = max(player.cx - player.width / 2, min(self.cx, player.cx + player.width / 2))
         nearestY = max(player.cy - player.height / 2, min(self.cy, player.cy + player.height / 2))
-
         if distance(self.cx, self.cy, nearestX, nearestY) < self.r:
-            self.vx = 1.4 * player.vx
-            self.vy = 1.4 * player.vy
+            if player.vx == 0 and player.vy == 0:
+                self.vx = 0.7 * -self.vx
+                self.vy = 0.7 * -self.vy
+            elif player.vx != 0 and player.vy == 0:
+                self.vx = 1.4 * player.vx
+                self.vy = 0.7 * -self.vy
+            elif player.vx == 0 and player.vy != 0:
+                self.vx = 0.7 * -self.vx
+                self.vy = 1.4 * player.vy
+            else:
+                self.vx = 1.4 * player.vx
+                self.vy = 1.4 * player.vy
