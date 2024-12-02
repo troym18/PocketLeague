@@ -3,7 +3,6 @@ from player import Player
 from ball import Ball
 import time
 import math
-DT = 1 / 60
 
 def onAppStart(app):
     app.width = 1200
@@ -16,6 +15,11 @@ def onAppStart(app):
     app.mapBottom = 725
     app.topGoalY = app.height/2 - 100
     app.bottomGoalY = app.height/2 + 100
+    app.TRCircle = [app.mapRight - app.cornerRadius, app.mapTop + app.cornerRadius]
+    app.TLCircle = [app.mapLeft + app.cornerRadius, app.mapTop + app.cornerRadius]
+    app.BLCircle = [app.mapLeft + app.cornerRadius, app.mapBottom - app.cornerRadius]
+    app.BRCircle = [app.mapRight - app.cornerRadius, app.mapBottom - app.cornerRadius]
+    app.circles = [app.TRCircle, app.TLCircle, app.BLCircle, app.BRCircle]
 
 #START
 
@@ -133,12 +137,7 @@ def multiplayerStart_onMousePress(app, mouseX, mouseY):
 #TRAINING MODE
 
 def training_onScreenActivate(app):
-    app.players=[Player(200,app.mapBottom-50,0,'blue',app)]
-    app.TRCircle = [app.mapRight - app.cornerRadius, app.mapTop + app.cornerRadius]
-    app.TLCircle = [app.mapLeft + app.cornerRadius, app.mapTop + app.cornerRadius]
-    app.BLCircle = [app.mapLeft + app.cornerRadius, app.mapBottom - app.cornerRadius]
-    app.BRCircle = [app.mapRight - app.cornerRadius, app.mapBottom - app.cornerRadius]
-    app.circles = [app.TRCircle, app.TLCircle, app.BLCircle, app.BRCircle]
+    app.players =[Player(200, app.mapBottom - 10,0, 'gray', app)]
     app.ball = Ball(app.width//2, app.height//2, app)
     app.scored = False
 
@@ -193,95 +192,124 @@ def training_onStep(app):
     or app.ball.cx - app.ball.r <= app.mapLeft)
     and app.topGoalY + app.ball.r <= app.ball.cy <= app.bottomGoalY - app.ball.r):
         app.scored = True
-    for player in app.players:
-        player.updateBoostState()
-        player.checkAirborne()
-        player.updateMovement()
-        app.ball.handlePlayerCollision(player)
-        if not player.inAir:
-            player.decelerate()
+    myPlayer = app.players[0]
+    myPlayer.updateBoostState()
+    myPlayer.checkAirborne()
+    myPlayer.updateMovement()
+    app.ball.handlePlayerCollision(myPlayer)
+    if not myPlayer.inAir:
+        myPlayer.decelerate()
 
 #END TRAINING MODE
 #1v1 PLAYER MODE
 
 def oneVPlayer_onScreenActivate(app):
-    app.TRCircle = [app.mapRight - app.cornerRadius, app.mapTop + app.cornerRadius]
-    app.TLCircle = [app.mapLeft + app.cornerRadius, app.mapTop + app.cornerRadius]
-    app.BLCircle = [app.mapLeft + app.cornerRadius, app.mapBottom - app.cornerRadius]
-    app.BRCircle = [app.mapRight - app.cornerRadius, app.mapBottom - app.cornerRadius]
-    app.circles = [app.TRCircle, app.TLCircle, app.BLCircle, app.BRCircle]
+    app.players = [Player(200,app.mapBottom - 10, 0,'blue', app), 
+    Player(app.width - 200, app.mapBottom - 10, 0, 'orange', app)]
     app.ball = Ball(app.width//2, app.height//2, app)
-    app.players = [Player(200,app.mapBottom-app.player.height,0,'blue',app), 
-    Player(app.width - 200, app.mapBottom-app.player.height, 0, 'orange', app)]
-    app.timer = 300 #5 minutes
+    app.timer = 120 #2 min timer
     app.blueScore = 0
     app.orangeScore = 0
-    app.countdown = 180
+    app.countdown = 240
     app.counter = 0
+    app.scored = False
+
+def activateKickoff(app):
+    app.scored = False
+    app.countdown = 240
+    player1 = app.players[0]
+    player2 = app.players[1]
+    player1.cx = 200
+    player1.cy = app.mapBottom - 20
+    player1.vx, player1.vy = 0, 0
+    player1.dir = 0
+    player1.boostLevel = 33
+    player2.cx = app.width - 200
+    player2.cy = app.mapBottom - 20
+    player2.dir = 0
+    player2.vx, player2.vy = 0, 0
+    player2.boostLevel = 33
+    app.ball.cx, app.ball.cy = app.width//2, app.height//2
+    app.ball.vx, app.ball.vy = 0, 0
 
 def oneVPlayer_redrawAll(app):
     drawLabel(f'{app.timer//60}:{app.timer%60}', app.width/2, 20, size = 30, font = 'monospace')
     drawLabel('Esc to return', 100, 50, size = 20, font = 'monospace')
     drawLabel(f'Blue: {app.blueScore}', 250, 50, size = 30, 
                 fill = 'blue', font = 'monospace')
-    drawLabel(f'Orange: {app.blueScore}', app.width - 250, 50, size = 30, 
+    drawLabel(f'Orange: {app.orangeScore}', app.width - 250, 50, size = 30, 
                 fill = 'orange', font = 'monospace')
     drawMap(app)
     drawPlayers(app)
     drawBall(app)
-    if app.countdown > 0:
-        drawLabel(app.countdown % 60, app.width/2, app.height/2, size = 50,
-                  font = 'monospace')
-
-         
+    if app.countdown > 1:
+        drawLabel(app.countdown // 60, app.width/2, app.height/2, size = 50,
+                font = 'monospace')
+    if app.scored:
+        drawLabel('GOAL!', app.width/2, app.height/2, size = 50, 
+        font = 'monospace', fill = gradient('orange','blue',start = 'left'))
+    if app.timer == 0:
+        if app.blueScore == app.orangeScore:
+            drawLabel('Tie! Esc to go back, r to restart!', app.width/2,
+            app.height/2, size = 50, font = 'monospace')
+        elif app.blueScore > app.orangeScore:
+            drawLabel('Blue Wins! Esc to go back, r to restart!', app.width/2,
+            app.height/2, size = 50, font = 'monospace')
+        else:
+            drawLabel('Orange Wins! Esc to go back, r to restart!', app.width/2,
+            app.height/2, size = 50, font = 'monospace')
+            
 def oneVPlayer_onKeyHold(app, keys):
     player1 = app.players[0]
     player2 = app.players[1]
-    if 'd' in keys and not player1.inAir:
-        player1.moveRight()
-    elif 'a' in keys and not player1.inAir:
-        player1.moveLeft()
-    if 'w' in keys and player1.inAir:
-        player1.rotate(5)
-    if 's' in keys and player1.inAir:
-        player1.rotate(-5)
-    if 'space' in keys:
-        if not player1.inAir:
-            player1.jump() 
-            player1.firstJumpTime = time.time()
-            player1.numJumps -= 1
-        elif player1.numJumps == 1:
-            currentTime = time.time()
-            if currentTime - player1.firstJumpTime > 0.4:
-                player1.jump()
+    if app.countdown == 0:
+        if 'd' in keys and not player1.inAir:
+            player1.moveRight()
+        elif 'a' in keys and not player1.inAir:
+            player1.moveLeft()
+        if 'w' in keys and player1.inAir:
+            player1.rotate(5)
+        if 's' in keys and player1.inAir:
+            player1.rotate(-5)
+        if 'space' in keys:
+            if not player1.inAir:
+                player1.jump() 
+                player1.firstJumpTime = time.time()
                 player1.numJumps -= 1
-    if 'e' in keys and player1.boostLevel > 0:
-        player1.boost()
-        player1.isBoosting = True
-    
-    if 'l' in keys and not player2.inAir:
-        player2.moveRight()
-    elif 'j' in keys and not player2.inAir:
-        player2.moveLeft()
-    if 'i' in keys and player2.inAir:
-        player2.rotate(5)
-    if 'k' in keys and player2.inAir:
-        player2.rotate(-5)
-    if 'o' in keys:
-        if not player2.inAir:
-            player2.jump() 
-            player2.firstJumpTime = time.time()
-            player2.numJumps -= 1
-        elif player2.numJumps == 1:
-            currentTime = time.time()
-            if currentTime - player2.firstJumpTime > 0.4:
-                player2.jump()
+            elif player1.numJumps == 1:
+                currentTime = time.time()
+                if currentTime - player1.firstJumpTime > 0.4:
+                    player1.jump()
+                    player1.numJumps -= 1
+        if 'e' in keys and player1.boostLevel > 0:
+            player1.boost()
+            player1.isBoosting = True
+        
+        if 'l' in keys and not player2.inAir:
+            player2.moveRight()
+        elif 'j' in keys and not player2.inAir:
+            player2.moveLeft()
+        if 'i' in keys and player2.inAir:
+            player2.rotate(5)
+        if 'k' in keys and player2.inAir:
+            player2.rotate(-5)
+        if 'o' in keys:
+            if not player2.inAir:
+                player2.jump() 
+                player2.firstJumpTime = time.time()
                 player2.numJumps -= 1
-    if 'n' in keys and player2.boostLevel > 0:
-        player2.boost()
-        player2.isBoosting = True
+            elif player2.numJumps == 1:
+                currentTime = time.time()
+                if currentTime - player2.firstJumpTime > 0.4:
+                    player2.jump()
+                    player2.numJumps -= 1
+        if 'n' in keys and player2.boostLevel > 0:
+            player2.boost()
+            player2.isBoosting = True
     if 'escape' in keys:
         setActiveScreen('start')
+    if 'r' in keys:
+        setActiveScreen('oneVPlayer')
 
 def oneVPlayer_onKeyRelease(app, keys):
     player1 = app.players[0]
@@ -294,9 +322,20 @@ def oneVPlayer_onKeyRelease(app, keys):
         player2.boostCooldown = time.time()
 
 def oneVPlayer_onStep(app):
-    if app.countdown == 0:
+    if app.timer != 0 and app.countdown == 0:
+        if app.scored:
+            time.sleep(1.5)
+            activateKickoff(app)
         if app.counter % 60 == 1:
             app.timer -= 1
+        if (app.ball.cx + app.ball.r >= app.mapRight and 
+        app.topGoalY + app.ball.r <= app.ball.cy <= app.bottomGoalY - app.ball.r):
+            app.scored = True
+            app.blueScore +=1
+        if (app.ball.cx - app.ball.r <= app.mapLeft and 
+        app.topGoalY + app.ball.r <= app.ball.cy <= app.bottomGoalY - app.ball.r):
+            app.scored = True
+            app.orangeScore +=1
         app.ball.updatePosition(app)
         for player in app.players:
             player.updateBoostState()
@@ -305,8 +344,8 @@ def oneVPlayer_onStep(app):
             app.ball.handlePlayerCollision(player)
             if not player.inAir:
                 player.decelerate()
-        counter += 1
-    else:
+        app.counter += 1
+    elif app.countdown > 0:
         app.countdown -= 1
 
 #END 1v1 PLAYER MODE

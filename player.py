@@ -73,7 +73,7 @@ class Player:
         self.dir += angle
 
     def checkAirborne(self):
-        tolerance = 10
+        tolerance = 5
         
         isGrounded = (
             abs(self.cy - (self.app.mapBottom - self.height / 2)) <= tolerance
