@@ -17,21 +17,28 @@ class Player:
         self.dir = direction
         self.team = team
         self.inAir = False
-        self.speed = 400
-        self.height = 20
-        self.width = 50
+        self.speed = 600
+        self.height = 30
+        self.width = 75
         self.numJumps = 0
         self.firstJumpTime = 0
         self.secondJumpTime = 0
         self.boostLevel = 33
         self.isBoosting = False
         self.boostCooldown = 0
+        self.inverted = False
+        self.touchingLeftWall = False
+        self.touchingRightWall = False
 
     def moveLeft(self):
         if not self.inAir and abs(self.vx) < self.speed:
             self.vx += 100 * -math.cos(math.radians(self.dir))
         if not self.inAir and abs(self.vy) < self.speed:
             self.vy += 100 * math.sin(math.radians(self.dir))
+        if self.touchingLeftWall or self.touchingRightWall:
+            self.inverted = False
+        else:
+            self.inverted = True
 
 
     def moveRight(self):
@@ -39,6 +46,10 @@ class Player:
             self.vx += 100 * math.cos(math.radians(self.dir))
         if not self.inAir and abs(self.vy) < self.speed:
             self.vy += 100 * -math.sin(math.radians(self.dir))
+        if self.touchingLeftWall or self.touchingRightWall:
+            self.inverted = True
+        else:
+            self.inverted = False
 
     def decelerate(self):
         if abs(self.vx) > 20 or abs(self.vy) > 20:
@@ -49,7 +60,11 @@ class Player:
         return
 
     def boost(self):
-        if self.inAir:
+        if self.inAir and self.inverted:
+            print(self.dir)
+            self.vx += 5 * math.cos(math.radians(self.dir - 180))
+            self.vy += 5 * math.sin(math.radians(self.dir - 180))
+        elif self.inAir and not self.inverted:
             self.vx += 5 * math.cos(math.radians(self.dir))
             self.vy += 5 * math.sin(math.radians(self.dir))
         else:
@@ -79,17 +94,17 @@ class Player:
             abs(self.cy - (self.app.mapBottom - self.height / 2)) <= tolerance
             and self.vy >= 0
         )
-        touchingLeftWall = (
+        self.touchingLeftWall = (
             abs(self.cx - (self.app.mapLeft + self.height / 2)) <= tolerance
         )
-        touchingRightWall = (
+        self.touchingRightWall = (
             abs(self.cx - (self.app.mapRight - self.height / 2)) <= tolerance
         )
         touchingCeiling = (
             abs(self.cy - (self.app.mapTop + self.height / 2)) <= tolerance
         )
-        self.inAir = not (isGrounded or touchingLeftWall 
-                        or touchingRightWall or touchingCeiling)
+        self.inAir = not (isGrounded or self.touchingLeftWall 
+                        or self.touchingRightWall or touchingCeiling)
         if not self.inAir:
             self.numJumps = 2
 
