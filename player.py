@@ -17,7 +17,7 @@ class Player:
         self.dir = direction
         self.team = team
         self.inAir = False
-        self.speed = 600
+        self.speed = 100
         self.height = 30
         self.width = 75
         self.numJumps = 0
@@ -31,10 +31,10 @@ class Player:
         self.touchingRightWall = False
 
     def moveLeft(self):
-        if not self.inAir and abs(self.vx) < self.speed:
-            self.vx += 100 * -math.cos(math.radians(self.dir))
+        if not self.inAir and abs(self.vx) < self.speed * 5:
+            self.vx += self.speed * -math.cos(math.radians(self.dir))
         if not self.inAir and abs(self.vy) < self.speed:
-            self.vy += 100 * math.sin(math.radians(self.dir))
+            self.vy += self.speed * math.sin(math.radians(self.dir))
         if self.touchingLeftWall or self.touchingRightWall:
             self.inverted = False
         else:
@@ -42,10 +42,10 @@ class Player:
 
 
     def moveRight(self):
-        if not self.inAir and abs(self.vx) < self.speed:
-            self.vx += 100 * math.cos(math.radians(self.dir))
+        if not self.inAir and abs(self.vx) < self.speed * 5:
+            self.vx += self.speed * math.cos(math.radians(self.dir))
         if not self.inAir and abs(self.vy) < self.speed:
-            self.vy += 100 * -math.sin(math.radians(self.dir))
+            self.vy += self.speed * -math.sin(math.radians(self.dir))
         if self.touchingLeftWall or self.touchingRightWall:
             self.inverted = True
         else:
@@ -61,7 +61,6 @@ class Player:
 
     def boost(self):
         if self.inAir and self.inverted:
-            print(self.dir)
             self.vx += 5 * math.cos(math.radians(self.dir - 180))
             self.vy += 5 * math.sin(math.radians(self.dir - 180))
         elif self.inAir and not self.inverted:
@@ -110,9 +109,8 @@ class Player:
 
     
     def updateMovement(self):
-        gravity = 200
         if self.inAir:
-            self.vy += gravity * DT
+            self.vy += self.app.gravity * DT
         else:
             if abs(self.vy) < 20:
                 self.vy = 0

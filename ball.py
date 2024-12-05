@@ -25,11 +25,10 @@ class Ball:
         self.app = app
     
     def updatePosition(self, app):
-        gravity = 200
         # Update position based on velocity
         self.cx += self.vx * DT
         self.cy += self.vy * DT
-        self.vy += gravity * DT
+        self.vy += self.app.gravity * DT
 
         self.handleWallCollision(app)
 
