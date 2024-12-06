@@ -33,7 +33,7 @@ class Player:
     def moveLeft(self):
         if not self.inAir and abs(self.vx) < self.speed * 5:
             self.vx += self.speed * -math.cos(math.radians(self.dir))
-        if not self.inAir and abs(self.vy) < self.speed:
+        if not self.inAir and abs(self.vy) < self.speed * 5:
             self.vy += self.speed * math.sin(math.radians(self.dir))
         if self.touchingLeftWall or self.touchingRightWall:
             self.inverted = False
@@ -44,7 +44,7 @@ class Player:
     def moveRight(self):
         if not self.inAir and abs(self.vx) < self.speed * 5:
             self.vx += self.speed * math.cos(math.radians(self.dir))
-        if not self.inAir and abs(self.vy) < self.speed:
+        if not self.inAir and abs(self.vy) < self.speed * 5:
             self.vy += self.speed * -math.sin(math.radians(self.dir))
         if self.touchingLeftWall or self.touchingRightWall:
             self.inverted = True
@@ -124,55 +124,55 @@ class Player:
 
     def checkBoundary(self):
         touchingBLCircle=(
-            distance (self.cx, self.cy, self.app.BLCircle[0], self.app.BLCircle[1]) >= self.app.cornerRadius 
-                    and self.cx < self.app.BLCircle[0] and self.cy > self.app.BLCircle[1]
+            distance (self.cx, self.cy, self.app.BLCircle[0], 
+                      self.app.BLCircle[1]) >= self.app.cornerRadius 
+                      and self.cx < self.app.BLCircle[0] 
+                      and self.cy > self.app.BLCircle[1]
         )
         touchingBRCircle=(
-            distance (self.cx, self.cy, self.app.BRCircle[0], self.app.BRCircle[1]) >= self.app.cornerRadius 
-                    and self.cx > self.app.BRCircle[0] and self.cy > self.app.BRCircle[1]
+            distance (self.cx, self.cy, self.app.BRCircle[0], 
+                      self.app.BRCircle[1]) >= self.app.cornerRadius 
+                      and self.cx > self.app.BRCircle[0] 
+                      and self.cy > self.app.BRCircle[1]
         )
         touchingTLCircle=(
-            distance (self.cx, self.cy, self.app.TLCircle[0], self.app.TLCircle[1]) >= self.app.cornerRadius 
-                    and self.cx < self.app.TLCircle[0] and self.cy < self.app.TLCircle[1]
+            distance (self.cx, self.cy, self.app.TLCircle[0], 
+                      self.app.TLCircle[1]) >= self.app.cornerRadius 
+                      and self.cx < self.app.TLCircle[0] 
+                      and self.cy < self.app.TLCircle[1]
         )
         touchingTRCircle=(
-            distance (self.cx, self.cy, self.app.TRCircle[0], self.app.TRCircle[1]) >= self.app.cornerRadius 
-                    and self.cx > self.app.TRCircle[0] and self.cy < self.app.TRCircle[1]
+            distance (self.cx, self.cy, self.app.TRCircle[0], 
+                      self.app.TRCircle[1]) >= self.app.cornerRadius 
+                      and self.cx > self.app.TRCircle[0] 
+                      and self.cy < self.app.TRCircle[1]
         )
         if touchingBLCircle:
             self.vx = random.randrange(250, 350)
             self.vy = random.randrange(-350, -250)
             self.inAir = True
             self.numJumps = 1
-            self.app.BLCircle[2] = True
-            self.app.bumperDelay = time.time()
         
         if touchingBRCircle:
             self.vx = random.randrange(-350, -250)
             self.vy = random.randrange(-350, -250)
             self.inAir = True
             self.numJumps = 1
-            self.app.BRCircle[2] = True
-            self.app.bumperDelay = time.time()
         
         if touchingTLCircle:
             self.vx = random.randrange(250, 350)
             self.vy = random.randrange(250, 350)
             self.inAir = True
             self.numJumps = 1
-            self.app.TLCircle[2] = True
-            self.app.bumperDelay = time.time()
         
         if touchingTRCircle:
             self.vx = random.randrange(-350, -250)
             self.vy = random.randrange(250, 350)
             self.inAir = True
             self.numJumps = 1
-            self.app.TRCircle[2] = True
-            self.app.bumperDelay = time.time()
         
         else:
-            # Handle rectangle boundaries (edges of the map outside corner circles)
+            # Handle rectangle boundaries
             self.cx = max(self.app.mapLeft + self.height / 2, 
                             min(self.cx, self.app.mapRight - self.height / 2))
             self.cy = max(self.app.mapTop + self.height / 2, 

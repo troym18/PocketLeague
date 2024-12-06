@@ -19,10 +19,14 @@ def onAppStart(app):
     app.mapBottom = app.height - 75
     app.topGoalY = app.height/2 - 125
     app.bottomGoalY = app.height/2 + 175
-    app.TRCircle = [app.mapRight - app.cornerRadius, app.mapTop + app.cornerRadius, False]
-    app.TLCircle = [app.mapLeft + app.cornerRadius, app.mapTop + app.cornerRadius, False]
-    app.BLCircle = [app.mapLeft  + app.cornerRadius, app.mapBottom - app.cornerRadius, False]
-    app.BRCircle = [app.mapRight - app.cornerRadius, app.mapBottom - app.cornerRadius, False]
+    app.TRCircle = [app.mapRight - app.cornerRadius, 
+                    app.mapTop + app.cornerRadius]
+    app.TLCircle = [app.mapLeft + app.cornerRadius, 
+                    app.mapTop + app.cornerRadius]
+    app.BLCircle = [app.mapLeft  + app.cornerRadius, 
+                    app.mapBottom - app.cornerRadius]
+    app.BRCircle = [app.mapRight - app.cornerRadius, 
+                    app.mapBottom - app.cornerRadius]
     app.circles = [app.TRCircle, app.TLCircle, app.BLCircle, app.BRCircle]
     app.ballState = 0
     app.counter = 0
@@ -51,10 +55,10 @@ def loadAllImages(app):
     app.backgroundImage = CMUImage(Image.open(currDir + '/GameBackground.webp'))
     app.titleScreen = CMUImage(Image.open(currDir + '/GameTitle.jpg'))
     app.titleText = CMUImage(Image.open(currDir + '/Title.png'))
-    bigFont = ImageFont.truetype('/Users/troymcbride/Library/Fonts/GoGoPosterPunch.ttf', 42) 
+    bigFont = ImageFont.truetype(currDir + '/GoGoPosterPunch.ttf', 42) 
     img = Image.new('RGB', (300, 75), (65, 105, 225))
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype('/Users/troymcbride/Library/Fonts/GoGoPosterPunch.ttf', 28) 
+    font = ImageFont.truetype(currDir + '/GoGoPosterPunch.ttf', 28) 
     draw.text((150, 37.5), "Training Mode", font = font, fill=(255, 255, 255), 
             anchor="mm", stroke_fill = (0,0,0), stroke_width = 3)
     path =currDir + '/TrainingMode.png'
@@ -62,8 +66,9 @@ def loadAllImages(app):
     app.trainingMode = CMUImage(Image.open(path))
     img = Image.new('RGB', (300, 75), (65, 105, 225))
     draw = ImageDraw.Draw(img)
-    draw.text((150, 37.5), "Multiplayer Mode", font = font, fill=(255, 255, 255), 
-            anchor="mm", stroke_fill = (0,0,0), stroke_width = 3)
+    draw.text((150, 37.5), "Multiplayer Mode", font = font, 
+            fill=(255, 255, 255), anchor="mm", 
+            stroke_fill = (0,0,0), stroke_width = 3)
     path = currDir + '/MultiplayerMode.png'
     img.save(path)
     app.multiplayerMode = CMUImage(Image.open(path))
@@ -90,15 +95,17 @@ def loadAllImages(app):
     app.oneVPlayer = CMUImage(Image.open(path))
     img = Image.new('RGB', (300, 75), (65, 105, 225))
     draw = ImageDraw.Draw(img)
-    draw.text((150, 37.5), "1 v 1 (Power Ups)", font = font, fill=(255, 255, 255), 
-            anchor="mm", stroke_fill = (0,0,0), stroke_width = 3)
+    draw.text((150, 37.5), "1 v 1 (Power Ups)", font = font, 
+            fill=(255, 255, 255), anchor="mm", stroke_fill = (0,0,0), 
+            stroke_width = 3)
     path = currDir + '/1v1PowerUps.png'
     img.save(path)
     app.oneVPowerUp = CMUImage(Image.open(path))
     img = Image.new('RGB', (500, 100), (170, 170, 170))
     draw = ImageDraw.Draw(img)
-    draw.text((250, 50), "Multiplayer Modes", font = bigFont, fill=(255, 255, 255), 
-            anchor="mm", stroke_fill = (0,0,0), stroke_width = 3)
+    draw.text((250, 50), "Multiplayer Modes", font = bigFont, 
+            fill=(255, 255, 255), anchor="mm", stroke_fill = (0,0,0), 
+            stroke_width = 3)
     path = currDir + '/MultiplayerModes.png'
     img.save(path)
     app.multiplayerModeTitle = CMUImage(Image.open(path))
@@ -143,9 +150,11 @@ def start_redrawAll(app):
             fill = None, border = 'black', borderWidth = 20)
     drawImage(app.trainingMode, 100, app.height - 100)
     if app.hoverMultiplayer:
-        drawRect(app.width/2 - buttonWidth/2 - 5 , app.height - 105, buttonWidth + 10, 
-        buttonHeight + 10, fill = None, border = 'black', borderWidth = 20)
-    drawImage(app.multiplayerMode, app.width/2 - buttonWidth/2 , app.height - 100)
+        drawRect(app.width/2 - buttonWidth/2 - 5 , app.height - 105, 
+        buttonWidth + 10, buttonHeight + 10, fill = None, 
+        border = 'black', borderWidth = 20)
+    drawImage(app.multiplayerMode, app.width/2 - buttonWidth/2 , 
+              app.height - 100)
     if app.hoverHowTo:
         drawRect(795, app.height - 105, buttonWidth + 10, buttonHeight + 10, 
         fill = None, border = 'black', borderWidth = 20)
@@ -194,16 +203,6 @@ def instructions_onScreenActivate(app):
 
 def instructions_redrawAll(app):
     drawImage(app.mainMenu, 0, 0, width = app.width, height = app.height)
-    # instructions = [
-    #     "The game is Rocket League. You are a car.",
-    #     "You can drive, jump, boost, and flip your car in any way.",
-    #     "Your goal is to score against your opponent by hitting",
-    #     "the ball into the goal opposite your corner. You can",
-    #     "use the corners to your advantage, as they act like",
-    #     "bumpers and give a speed boost into the air.",
-    #     "",
-    #     "Good luck!"
-    # ]
 
     buttonWidth = 300
     buttonHeight = 75
@@ -211,21 +210,12 @@ def instructions_redrawAll(app):
     drawImage(app.instructionsTitle, app.width / 2 - 250, 0)
     drawImage(app.gameDescription, 100, 100, width = 1000, height = 300)
 
-    # y = 150
-    # drawRect(200, 100, 800, 300, fill='white')
-    # for line in instructions:
-    #     drawLabel(line, app.width / 2, y, size=20, fill="black")
-    #     y += 30
     drawImage(app.powerUpsTitle, app.width/2 - buttonWidth/2 , 575)
     if app.hoverKeybinds:
         drawRect(app.width / 2 - buttonWidth / 2 - 5, 445, buttonWidth + 10, 
              buttonHeight + 10, fill=None, border="black", borderWidth = 10)
     drawImage(app.keybinds, app.width / 2 - buttonWidth/2, 450)
     drawLabel("Esc to return", 100, 50, size=20)
-    # powerUp(app, 300, app.height - 100, "speed"),
-    #                 powerUp(app, 500, app.height - 100, "boost"),
-    #                 powerUp(app, 700, app.height - 100, "swap"),
-    #                 powerUp(app, 900, app.height - 100, "gravity")]
     drawLabel("Speed Boost", 300, app.height - 130, 
             size = 20, fill = gradient('red', 'orange', start = 'center'))
     drawLabel("Increase Driving Speed", 300, app.height - 70, 
@@ -276,35 +266,6 @@ def keybinds_redrawAll(app):
     drawImage(app.mainMenu, 0, 0, width = app.width, height = app.height)
     drawImage(app.keybindsTitle, app.width / 2 - 250, 0)
     drawImage(app.keybindsDescription, 100, 100, width = 1000, height = 700)
-    # drawRect(app.width/2 - 300, 85, 600, 700, fill = 'white' )
-    # drawLabel('Singleplayer',app.width/2, 100, 
-    #          size= 30, font = 'arial')
-    # drawLabel('w\t\t-\t\tRotate Car CounterClockwise',app.width/2, 150, 
-    #          size= 25, font = 'arial')
-    # drawLabel('s\t\t-\t\tRotate Car Clockwise',app.width/2, 200, 
-    #          size= 25, font = 'arial')
-    # drawLabel('d\t\t-\t\tDrive Forward',app.width/2, 250, 
-    #          size= 25, font = 'arial')
-    # drawLabel('a\t\t-\t\tDrive Backward',app.width/2, 300, 
-    #          size= 25, font = 'arial')
-    # drawLabel('space\t\t-\t\tJump',app.width/2, 350, 
-    #          size= 25, font = 'arial')
-    # drawLabel('e\t\t-\t\tBoost',app.width/2, 400, 
-    #          size= 25, font = 'arial')
-    # drawLabel('Multiplayer (Car 2)',app.width/2, 450, 
-    #          size= 30, font = 'arial')
-    # drawLabel('i\t\t-\t\tRotate Car CounterClockwise',app.width/2, 500, 
-    #          size= 25, font = 'arial')
-    # drawLabel('k\t\t-\t\tRotate Car Clockwise',app.width/2, 550, 
-    #          size= 25, font = 'arial')
-    # drawLabel('l\t\t-\t\tDrive Forward',app.width/2, 600, 
-    #          size= 25, font = 'arial')
-    # drawLabel('j\t\t-\t\tDrive Backward',app.width/2, 650, 
-    #          size= 25, font = 'arial')
-    # drawLabel('o\t\t-\t\tJump',app.width/2, 700, 
-    #          size= 25, font = 'arial')
-    # drawLabel('n\t\t-\t\tBoost',app.width/2, 750, 
-    #          size= 25, font = 'arial')
     drawLabel('Esc to return', 100, 50, size = 20, font = 'arial')
 
 def keybinds_onKeyPress(app, key):
@@ -331,10 +292,6 @@ def multiplayerStart_redrawAll(app):
         drawRect(app.width/2 - buttonWidth/2 - 5, 345, buttonWidth + 10,
         buttonHeight + 10, fill = None, border = 'black', borderWidth = 20)
     drawImage(app.oneVPowerUp, app.width/2 - buttonWidth/2, 350)
-    # drawRect(app.width/2 - buttonWidth/2, 500, buttonWidth, buttonHeight, 
-    #         fill = None, border = 'black')
-    # drawLabel("2v2 (AI)", app.width/2, 500 + buttonHeight/2, size = 30, 
-    #           font = 'arial')
     drawLabel('Esc to return', 100, 50, size = 20, font = 'arial')
 
 def multiplayerStart_onKeyPress(app, key):
@@ -350,9 +307,6 @@ def multiplayerStart_onMousePress(app, mouseX, mouseY):
     if (app.width/2 - buttonWidth/2 <= mouseX <= app.width/2 + buttonWidth/2 and
         350 <= mouseY <= 350 + buttonHeight):
         setActiveScreen('powerups')
-    # if (app.width/2 - buttonWidth/2 <= mouseX <= app.width/2 + buttonWidth/2 and
-    #     500 <= mouseY <= 500 + buttonHeight):
-    #     setActiveScreen('2v2AI')
 
 def multiplayerStart_onMouseMove(app, mouseX, mouseY):
     buttonWidth = 300
@@ -380,9 +334,12 @@ def training_onScreenActivate(app):
 
 def training_redrawAll(app):
     drawMap(app)
-    drawLabel('Esc to return', 100, 50, size = 20, font = 'arial', fill = 'white')
+    drawRect(30, 35, 140, 30, fill = 'gray')
+    drawLabel('Esc to return', 100, 50, size = 20, font = 'arial', 
+              fill = 'white')
     drawRect(app.width/2 - 150, 0, 300, 40, fill = 'white')
-    drawLabel("Training Mode", app.width/2, 20, size = 30, font = 'arial', fill = 'black')
+    drawLabel("Training Mode", app.width/2, 20, size = 30, font = 'arial', 
+              fill = 'black')
     drawPlayers(app)
     drawBall(app)
     if app.scored:
@@ -432,7 +389,8 @@ def training_onStep(app):
     if (app.ball.cx + app.ball.r >= app.mapRight or 
           app.ball.cx - app.ball.r <= app.mapLeft and 
           app.topGoalY <= app.ball.cy <= app.bottomGoalY):
-        if (app.topGoalY + app.ball.r <= app.ball.cy <= app.bottomGoalY - app.ball.r):
+        if (app.topGoalY + app.ball.r <= app.ball.cy 
+            <= app.bottomGoalY - app.ball.r):
             app.scored = True
         else:
             app.closeScore = True
@@ -449,9 +407,6 @@ def training_onStep(app):
     currentTime = time.time()
     if abs(currentTime - app.delay) > 1:
         app.closeScore = False
-    for circle in app.circles:
-        if circle[2] and abs(time.time() - app.bumperDelay) > 0.5:
-            circle[2] = False
     ballSpeed = rounded(math.sqrt(app.ball.vx ** 2 + app.ball.vy ** 2))
     updateRate = max(8, 120 - int(ballSpeed * 3))
     if app.counter % updateRate == 0:
@@ -476,37 +431,16 @@ def oneVPlayer_onScreenActivate(app):
     player1.inverted = False
     player2.inverted = True
 
-def activateKickoff(app):
-    app.scored = False
-    app.countdown = 240
-    player1 = app.players[0]
-    player2 = app.players[1]
-    player1.cx = 200
-    player1.cy = app.mapBottom - 20
-    player1.vx, player1.vy = 0, 0
-    player1.dir = 0
-    player1.boostLevel = 33
-    player2.cx = app.width - 200
-    player2.cy = app.mapBottom - 20
-    player2.dir = 0
-    player2.vx, player2.vy = 0, 0
-    player2.boostLevel = 33
-    app.ball.cx, app.ball.cy = app.width//2, app.height//2
-    app.ball.vx, app.ball.vy = 0, 0
-    player1.inverted = False
-    player2.inverted = True
-    app.powerUps = []
-
 def oneVPlayer_redrawAll(app):
     drawMap(app)
-    drawRect(app.width/2 - 50, 0, 100, 40, fill = 'white')
-    drawLabel(f'{app.timer//60}:{app.timer%60}', app.width/2, 20, size = 30, 
-            font = 'arial', fill = 'black')
-    drawLabel('Esc to return', 100, 50, size = 20, 
+    drawRect(0, 0, app.width, 40, fill = 'gray')
+    drawLabel(f'{app.timer//60}:{app.timer%60}', app.width/2, 20, 
+              size = 30, font = 'arial')
+    drawLabel('Esc to return', 100, 20, size = 20, 
              font = 'arial', fill = 'white')
-    drawLabel(f'Blue: {app.blueScore}', 250, 50, size = 30, 
+    drawLabel(f'Blue: {app.blueScore}', 250, 20, size = 30, 
                 fill = 'blue', font = 'arial')
-    drawLabel(f'Orange: {app.orangeScore}', app.width - 250, 50, size = 30, 
+    drawLabel(f'Orange: {app.orangeScore}', app.width - 250, 20, size = 30, 
                 fill = 'orange', font = 'arial')
     drawPlayers(app)
     drawBall(app)
@@ -556,15 +490,15 @@ def oneVPlayer_onKeyHold(app, keys):
             player1.boost()
             player1.isBoosting = True
             player1.boostCooldown = time.time()
-        if 'l' in keys and not player2.inAir:
+        if 'right' in keys and not player2.inAir:
             player2.moveRight()
-        elif 'j' in keys and not player2.inAir:
+        elif 'left' in keys and not player2.inAir:
             player2.moveLeft()
-        if 'i' in keys and player2.inAir:
+        if 'up' in keys and player2.inAir:
             player2.rotate(5)
-        if 'k' in keys and player2.inAir:
+        if 'down' in keys and player2.inAir:
             player2.rotate(-5)
-        if 'o' in keys:
+        if '.' in keys:
             if not player2.inAir:
                 player2.jump() 
                 player2.firstJumpTime = time.time()
@@ -574,7 +508,7 @@ def oneVPlayer_onKeyHold(app, keys):
                 if currentTime - player2.firstJumpTime > 0.4:
                     player2.jump()
                     player2.numJumps -= 1
-        if 'n' in keys and player2.boostLevel > 0:
+        if '/' in keys and player2.boostLevel > 0:
             player2.boost()
             player2.isBoosting = True
             player2.boostCooldown = time.time()
@@ -589,7 +523,7 @@ def oneVPlayer_onKeyRelease(app, keys):
     if 'e' in keys:
         player1.isBoosting = False
         player1.boostCooldown = time.time()
-    if 'n' in keys:
+    if '/' in keys:
         player2.isBoosting = False
         player2.boostCooldown = time.time()
 
@@ -603,11 +537,13 @@ def oneVPlayer_onStep(app):
         if app.counter % 60 == 1:
             app.timer -= 1
         if (app.ball.cx + app.ball.r >= app.mapRight and 
-        app.topGoalY + app.ball.r <= app.ball.cy <= app.bottomGoalY - app.ball.r):
+            app.topGoalY + app.ball.r <= app.ball.cy <= 
+            app.bottomGoalY - app.ball.r):
             app.scored = True
             app.blueScore +=1
         elif (app.ball.cx - app.ball.r <= app.mapLeft and 
-        app.topGoalY + app.ball.r <= app.ball.cy <= app.bottomGoalY - app.ball.r):
+            app.topGoalY + app.ball.r <= app.ball.cy <= 
+            app.bottomGoalY - app.ball.r):
             app.scored = True
             app.orangeScore +=1
         elif (app.ball.cx + app.ball.r >= app.mapRight or 
@@ -616,9 +552,6 @@ def oneVPlayer_onStep(app):
             app.closeScore = True
             app.delay = app.timer
         app.ball.updatePosition(app)
-        for circle in app.circles:
-            if circle[2] and abs(time.time() - app.bumperDelay) > 0.5:
-                circle[2] = False
         for player in app.players:
             if player.boostLevel <= 0:
                 player.isBoosting = False
@@ -638,10 +571,11 @@ def oneVPlayer_onStep(app):
 
 #END 1v1 PLAYER MODE
 #1v1 POWERUPS MODE
+
 def powerups_onScreenActivate(app):
     app.players = [Player(200,app.mapBottom - 10, 0,'Blue', app), 
     Player(app.width - 200, app.mapBottom - 10, 0, 'Orange', app)]
-    app.ball = Ball(app.width//2, 625, app)
+    app.ball = Ball(app.width//2, app.height//2, app)
     app.timer = 120 #2 min timer
     app.blueScore = 0
     app.orangeScore = 0
@@ -657,12 +591,14 @@ def powerups_onScreenActivate(app):
 
 def powerups_redrawAll(app):
     drawMap(app)
-    drawRect(app.width/2 - 50, 0, 100, 40, fill = 'white')
-    drawLabel(f'{app.timer//60}:{app.timer%60}', app.width/2, 20, size = 30, font = 'arial')
-    drawLabel('Esc to return', 100, 50, size = 20, font = 'arial')
-    drawLabel(f'Blue: {app.blueScore}', 250, 50, size = 30, 
+    drawRect(0, 0, app.width, 40, fill = 'gray')
+    drawLabel(f'{app.timer//60}:{app.timer%60}', app.width/2, 20, 
+              size = 30, font = 'arial')
+    drawLabel('Esc to return', 100, 20, size = 20, 
+             font = 'arial', fill = 'white')
+    drawLabel(f'Blue: {app.blueScore}', 250, 20, size = 30, 
                 fill = 'blue', font = 'arial')
-    drawLabel(f'Orange: {app.orangeScore}', app.width - 250, 50, size = 30, 
+    drawLabel(f'Orange: {app.orangeScore}', app.width - 250, 20, size = 30, 
                 fill = 'orange', font = 'arial')
     drawPlayers(app)
     drawBall(app)
@@ -715,15 +651,15 @@ def powerups_onKeyHold(app, keys):
             player1.boost()
             player1.isBoosting = True
             player1.boostCooldown = time.time()
-        if 'l' in keys and not player2.inAir:
+        if 'right' in keys and not player2.inAir:
             player2.moveRight()
-        elif 'j' in keys and not player2.inAir:
+        elif 'left' in keys and not player2.inAir:
             player2.moveLeft()
-        if 'i' in keys and player2.inAir:
+        if 'up' in keys and player2.inAir:
             player2.rotate(5)
-        if 'k' in keys and player2.inAir:
+        if 'down' in keys and player2.inAir:
             player2.rotate(-5)
-        if 'o' in keys:
+        if '.' in keys:
             if not player2.inAir:
                 player2.jump() 
                 player2.firstJumpTime = time.time()
@@ -733,7 +669,7 @@ def powerups_onKeyHold(app, keys):
                 if currentTime - player2.firstJumpTime > 0.4:
                     player2.jump()
                     player2.numJumps -= 1
-        if 'n' in keys and player2.boostLevel > 0:
+        if '/' in keys and player2.boostLevel > 0:
             player2.boost()
             player2.isBoosting = True
             player2.boostCooldown = time.time()
@@ -748,36 +684,38 @@ def powerups_onKeyRelease(app, keys):
     if 'e' in keys:
         player1.isBoosting = False
         player1.boostCooldown = time.time()
-    if 'n' in keys:
+    if '/' in keys:
         player2.isBoosting = False
         player2.boostCooldown = time.time()
 
 def powerups_onStep(app):
     if app.timer != 0 and app.countdown == 0:
         checkPowerUpCollision(app)
-        if app.scored:
-            time.sleep(1.5)
-            activateKickoff(app)
         i = 0
         while i < len(app.powerUps):
-            if abs(time.time() - app.powerUps[i].startTime) >= 7 and not app.powerUps[i].active:
+            if ((abs(time.time() - app.powerUps[i].startTime) >= 7 or 
+                app.scored) and not app.powerUps[i].active):
                 app.powerUps[i].revert(app.powerUps[i].appliedPlayer)
                 app.powerUps.pop(i)
             else:
                 i +=1
+        if app.scored:
+            time.sleep(1.5)
+            activateKickoff(app)
         if app.closeScore and app.delay - app.timer > 2:
             app.closeScore = False
         if app.counter % 60 == 1:
             app.timer -= 1
-        randomTime = random.randint(8, 11) * 60
-        if app.counter % randomTime == 1:
+        if app.counter % 400 == 1:
             spawnPowerUps(app)
         if (app.ball.cx + app.ball.r >= app.mapRight and 
-        app.topGoalY + app.ball.r <= app.ball.cy <= app.bottomGoalY - app.ball.r):
+        app.topGoalY + app.ball.r <= app.ball.cy <= 
+        app.bottomGoalY - app.ball.r):
             app.scored = True
             app.blueScore +=1
         elif (app.ball.cx - app.ball.r <= app.mapLeft and 
-        app.topGoalY + app.ball.r <= app.ball.cy <= app.bottomGoalY - app.ball.r):
+        app.topGoalY + app.ball.r <= app.ball.cy <= 
+        app.bottomGoalY - app.ball.r):
             app.scored = True
             app.orangeScore +=1
         elif (app.ball.cx + app.ball.r >= app.mapRight or 
@@ -786,9 +724,6 @@ def powerups_onStep(app):
             app.closeScore = True
             app.delay = app.timer
         app.ball.updatePosition(app)
-        for circle in app.circles:
-            if circle[2] and abs(time.time() - app.bumperDelay) > 0.5:
-                circle[2] = False
         for player in app.players:
             if player.boostLevel <= 0:
                 player.isBoosting = False
@@ -809,8 +744,8 @@ def powerups_onStep(app):
 def spawnPowerUps(app):
     app.powerUps = [
         powerUp(app, 
-                random.randint(app.mapLeft, app.mapRight), 
-                random.randint(app.mapTop, app.mapBottom), 
+                random.randint(app.mapLeft + 30, app.mapRight - 30), 
+                random.randint(app.mapTop + 30, app.mapBottom - 30), 
                 random.choice(["speed", "boost", "swap", "gravity"]))
     ]
 
@@ -819,7 +754,8 @@ def checkPowerUpCollision(app):
         for i in range(2):
             player1 = app.players[i]
             player2 = app.players[1-i]
-            if distance(player1.cx, player1.cy, powerUp.cx, powerUp.cy) < powerUp.r + player1.width / 2 and powerUp.active:
+            if (distance(player1.cx, player1.cy, powerUp.cx, powerUp.cy) < 
+                        powerUp.r + player1.width / 2 and powerUp.active):
                 powerUp.apply(player1,player2)
                 powerUp.appliedPlayer = player1
                 powerUp.active = False
@@ -828,6 +764,27 @@ def checkPowerUpCollision(app):
 #END 1v1 POWERUPS
 #GENERAL FUNCTIONS
 
+def activateKickoff(app):
+    app.scored = False
+    app.countdown = 240
+    player1 = app.players[0]
+    player2 = app.players[1]
+    player1.cx = 200
+    player1.cy = app.mapBottom - 20
+    player1.vx, player1.vy = 0, 0
+    player1.dir = 0
+    player1.boostLevel = 33
+    player2.cx = app.width - 200
+    player2.cy = app.mapBottom - 20
+    player2.dir = 0
+    player2.vx, player2.vy = 0, 0
+    player2.boostLevel = 33
+    app.ball.cx, app.ball.cy = app.width//2, app.height//2
+    app.ball.vx, app.ball.vy = 0, 0
+    player1.inverted = False
+    player2.inverted = True
+    app.powerUps = []
+
 def drawBall(app):
     drawImage(app.ballSprites[app.ballState], app.ball.cx - app.ball.r, 
         app.ball.cy - app.ball.r, 
@@ -835,7 +792,7 @@ def drawBall(app):
 
 def drawMap(app):
     drawImage(app.backgroundImage, 0, 0, width = app.width, height = app.height)
-    # #Blue and Orange goals
+
     drawLine(25, app.topGoalY, 25, app.bottomGoalY, fill='blue', lineWidth=15)
     drawLine(app.width-25, app.topGoalY, app.width-25, app.bottomGoalY, 
             fill='orange', lineWidth=15)
@@ -861,23 +818,32 @@ def drawPlayers(app):
             inverted = app.orangeInverted
         if not player.inverted:
             if player.isBoosting and player.boostLevel > 2:
-                drawImage(boost, player.cx-player.width/2 - 20,player.cy-player.height/2 - 3,
-                width =player.width + 20, height = player.height + 3, rotateAngle=player.dir)
+                drawImage(boost, player.cx-player.width/2 - 20,
+                          player.cy-player.height/2 - 3,
+                          width =player.width + 20, 
+                          height = player.height + 3, rotateAngle=player.dir)
             else:
-                drawImage(car,player.cx-player.width/2,player.cy-player.height/2,
-                width =player.width, height = player.height, rotateAngle=player.dir)
+                drawImage(car,player.cx-player.width/2,
+                          player.cy-player.height/2,
+                          width =player.width, 
+                          height = player.height, rotateAngle=player.dir)
         else:
             if player.isBoosting and player.boostLevel > 2:
-                drawImage(boostInv,player.cx-player.width/2 ,player.cy-player.height/2 - 3,
-                width =player.width + 20, height = player.height + 3, rotateAngle=player.dir)
+                drawImage(boostInv,player.cx-player.width/2,
+                          player.cy-player.height/2 - 3,
+                          width =player.width + 20, 
+                          height = player.height + 3, rotateAngle=player.dir)
             else:
-                drawImage(inverted, player.cx-player.width/2,player.cy-player.height/2,
-                width =player.width, height = player.height, rotateAngle=player.dir)
+                drawImage(inverted, player.cx-player.width/2,
+                          player.cy-player.height/2,
+                          width =player.width, height = player.height, 
+                          rotateAngle=player.dir)
 
         startAngle = 0
         sweepAngle = rounded(player.boostLevel * (360/100))
         if sweepAngle != 0:
-            drawArc(boostX,app.height-50, 50, 50, startAngle, sweepAngle, fill=(player.team).lower())
+            drawArc(boostX,app.height-50, 50, 50, startAngle, 
+                    sweepAngle, fill=(player.team).lower())
         drawLabel(player.boostLevel, boostX, app.height-50, size = 30, 
         bold = True, fill = 'black')
         boostX += app.width - 100
@@ -888,7 +854,6 @@ def main():
 main()
 
 #CREDITS
-#IMAGE CREDITS:
 #Title Background: https://sideswipe.rocketleague.com/en/
 #Font: GoGoPosterPunch https://www.dafont.com/gogoposterpunch.font
 #Game Background: https://sideswipe.rocketleague.com/en/ (In Game)
