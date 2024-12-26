@@ -25,6 +25,7 @@ class Ball:
         self.app = app
     
     def updatePosition(self, app):
+        # Update position based on velocity
         self.cx += self.vx * DT
         self.cy += self.vy * DT
         self.vy += self.app.gravity * DT
@@ -33,48 +34,52 @@ class Ball:
 
     def handleWallCollision(self, app):
         touchingBLCircle=(
-        distance (self.cx, self.cy, self.app.BLCircle[0], 
-        self.app.BLCircle[1]) >= self.app.cornerRadius - self.r 
-        and self.cx < self.app.BLCircle[0] and self.cy > self.app.BLCircle[1]
+            distance (self.cx, self.cy, self.app.BLCircle[0], self.app.BLCircle[1]) >= self.app.cornerRadius - self.r 
+                    and self.cx < self.app.BLCircle[0] and self.cy > self.app.BLCircle[1]
         )
         touchingBRCircle=(
-        distance (self.cx, self.cy, self.app.BRCircle[0], 
-        self.app.BRCircle[1]) >= self.app.cornerRadius - self.r 
-        and self.cx > self.app.BRCircle[0] and self.cy > self.app.BRCircle[1]
+            distance (self.cx, self.cy, self.app.BRCircle[0], self.app.BRCircle[1]) >= self.app.cornerRadius - self.r 
+                    and self.cx > self.app.BRCircle[0] and self.cy > self.app.BRCircle[1]
         )
         touchingTLCircle=(
-        distance (self.cx, self.cy, self.app.TLCircle[0], 
-        self.app.TLCircle[1]) >= self.app.cornerRadius - self.r 
-        and self.cx < self.app.TLCircle[0] and self.cy < self.app.TLCircle[1]
+            distance (self.cx, self.cy, self.app.TLCircle[0], self.app.TLCircle[1]) >= self.app.cornerRadius - self.r 
+                    and self.cx < self.app.TLCircle[0] and self.cy < self.app.TLCircle[1]
         )
         touchingTRCircle=(
-        distance (self.cx, self.cy, self.app.TRCircle[0], 
-        self.app.TRCircle[1]) >= self.app.cornerRadius - self.r 
-        and self.cx > self.app.TRCircle[0] and self.cy < self.app.TRCircle[1]
+            distance (self.cx, self.cy, self.app.TRCircle[0], self.app.TRCircle[1]) >= self.app.cornerRadius - self.r 
+                    and self.cx > self.app.TRCircle[0] and self.cy < self.app.TRCircle[1]
         )
         if touchingBLCircle:
             self.cx = self.app.BLCircle[0]
             self.cy = self.app.BLCircle[1]
             self.vx = random.randrange(100, 400)
             self.vy = random.randrange(-400, -100)
+            self.app.BLCircle[2] = True
+            self.app.bumperDelay = time.time()
         
         if touchingBRCircle:
             self.cx = self.app.BRCircle[0]
             self.cy = self.app.BRCircle[1]
             self.vx = random.randrange(-400, -100)
             self.vy = random.randrange(-400, -100)
+            self.app.BRCircle[2] = True
+            self.app.bumperDelay = time.time()
         
         if touchingTLCircle:
             self.cx = self.app.TLCircle[0]
             self.cy = self.app.TLCircle[1]
             self.vx = random.randrange(100, 400)
             self.vy = random.randrange(100, 400)
+            self.app.TLCircle[2] = True
+            self.app.bumperDelay = time.time()
         
         if touchingTRCircle:
             self.cx = self.app.TRCircle[0]
             self.cy = self.app.TRCircle[1]
             self.vx = random.randrange(-400, -100)
             self.vy = random.randrange(100, 400)
+            self.app.TRCircle[2] = True
+            self.app.bumperDelay = time.time()
             
         elif self.cx - self.r < app.mapLeft or self.cx + self.r > app.mapRight:
             self.vx *= -self.damping 
@@ -88,10 +93,8 @@ class Ball:
 
 
     def handlePlayerCollision(self, player):
-        nearestX = max(player.cx - player.width / 2, 
-        min(self.cx, player.cx + player.width / 2))
-        nearestY = max(player.cy - player.height / 2, 
-        min(self.cy, player.cy + player.height / 2))
+        nearestX = max(player.cx - player.width / 2, min(self.cx, player.cx + player.width / 2))
+        nearestY = max(player.cy - player.height / 2, min(self.cy, player.cy + player.height / 2))
         if distance(self.cx, self.cy, nearestX, nearestY) < self.r:
             if player.vx == 0 and player.vy == 0:
                 self.vx = 0.7 * -self.vx
